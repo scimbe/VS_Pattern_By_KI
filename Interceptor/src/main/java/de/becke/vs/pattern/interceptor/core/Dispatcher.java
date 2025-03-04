@@ -156,6 +156,9 @@ public class Dispatcher {
                 return false;
             }
             
+            // Variable zum Verfolgen, ob eine Exception aufgetreten ist und behandelt wurde
+            boolean exceptionHandled = false;
+            
             // Führe die eigentliche Operation aus
             try {
                 Object result = operation.execute(context);
@@ -169,7 +172,11 @@ public class Dispatcher {
                 
                 // Fehlerbehandlung durch Interceptoren
                 boolean handled = handleException(context, e);
-                if (!handled) {
+                if (handled) {
+                    // Wenn ein Interceptor den Fehler behandelt hat, setzen wir den Status auf erfolgreich
+                    context.setSuccessful(true);
+                    exceptionHandled = true;
+                } else {
                     // Wenn kein Interceptor den Fehler behandelt hat, werfen wir ihn weiter
                     if (e instanceof RuntimeException) {
                         throw (RuntimeException) e;
@@ -179,8 +186,10 @@ public class Dispatcher {
                 }
             }
             
-            // Post-Processing
-            postProcess(context);
+            // Post-Processing nur durchführen, wenn keine Exception behandelt wurde
+            if (!exceptionHandled) {
+                postProcess(context);
+            }
             
             return context.isSuccessful();
         } catch (Exception e) {
