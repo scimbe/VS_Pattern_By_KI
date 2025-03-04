@@ -6,6 +6,7 @@ import de.becke.vs.pattern.dependencyinjection.common.RemoteServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Primary;
  * Spring-Konfigurationsklasse, die Beans für die Dependency Injection definiert.
  */
 @Configuration
+@ComponentScan(basePackages = "de.becke.vs.pattern.dependencyinjection.spring")
 public class SpringConfig {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringConfig.class);
