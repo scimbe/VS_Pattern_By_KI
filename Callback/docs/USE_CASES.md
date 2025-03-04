@@ -34,7 +34,7 @@ mindmap
 ### 1. Asynchrone API-Integrationen mit Webhooks
 
 ```mermaid
-graph TD
+flowchart TD
     A[Client] -->|1. API-Anfrage mit callback_url| B[API-Server]
     B -->|2. Akzeptiert Anfrage| A
     B -->|3. Startet asynchrone Verarbeitung| C[Verarbeitungsdienst]
@@ -83,7 +83,7 @@ sequenceDiagram
 ### 2. Message-Queue-basierte Callbacks für Verarbeitung großer Datenmengen
 
 ```mermaid
-graph LR
+flowchart LR
     A[Datenimport-Client] --> B[Message Queue]
     
     subgraph "Verarbeitungscluster"
@@ -135,18 +135,18 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    A[Client] -->|1. Starte Dataflow-Job| B[Cloud API]
-    B -->|2. Erstelle Job| C[Verarbeitungsdienst]
-    B -->|3. Liefere Job-ID| A
+    A[Client] -->|"1. Starte Dataflow-Job"| B[Cloud API]
+    B -->|"2. Erstelle Job"| C[Verarbeitungsdienst]
+    B -->|"3. Liefere Job-ID"| A
     
-    A -->|4. Polling: GET /jobs/{job_id}| B
-    B -->|5. Status: RUNNING| A
+    A -->|"4. Polling: GET /jobs/{job_id}"| B
+    B -->|"5. Status: RUNNING"| A
     
-    C -->|6. Verarbeitet Daten| C
-    C -->|7. Aktualisiert Status| B
+    C -->|"6. Verarbeitet Daten"| C
+    C -->|"7. Aktualisiert Status"| B
     
-    A -->|8. Polling: GET /jobs/{job_id}| B
-    B -->|9. Status: COMPLETED, Ergebnisse| A
+    A -->|"8. Polling: GET /jobs/{job_id}"| B
+    B -->|"9. Status: COMPLETED, Ergebnisse"| A
     
     subgraph "Client-System"
         A
@@ -161,8 +161,8 @@ flowchart TD
 #### Komponentendiagramm für ein Polling-System
 
 ```mermaid
-graph TD
-    A[Client] -->|1. Initiiert Aufgabe| B[API-Gateway]
+flowchart TD
+    A[Client] -->|"1. Initiiert Aufgabe"| B[API-Gateway]
     
     subgraph "Backend-Dienste"
         B --> C[Aufgabenmanager]
@@ -172,29 +172,29 @@ graph TD
         F --> D
     end
     
-    A -->|2. Polling-Anfrage| B
+    A -->|"2. Polling-Anfrage"| B
     B --> C
     C --> D
-    D -->|3. Status/Ergebnis| C
-    C -->|4. Status/Ergebnis| B
-    B -->|5. Status/Ergebnis| A
+    D -->|"3. Status/Ergebnis"| C
+    C -->|"4. Status/Ergebnis"| B
+    B -->|"5. Status/Ergebnis"| A
 ```
 
 ### 4. Retry-Callbacks für zuverlässige Systemintegration
 
 ```mermaid
-graph TD
+flowchart TD
     A[Client] --> B[Retry-Manager]
     B --> C{Ausführen}
     
-    C -->|1. Versuch| D[Remote Service]
-    D -->|Fehler| E[Backoff-Strategie]
+    C -->|"1. Versuch"| D[Remote Service]
+    D -->|"Fehler"| E[Backoff-Strategie]
     E --> F{Max Retries?}
     
-    F -->|Nein| C
-    F -->|Ja| G[Fehler-Callback]
+    F -->|"Nein"| C
+    F -->|"Ja"| G[Fehler-Callback]
     
-    D -->|Erfolg| H[Erfolgs-Callback]
+    D -->|"Erfolg"| H[Erfolgs-Callback]
     
     G --> A
     H --> A
@@ -232,20 +232,20 @@ stateDiagram-v2
 ## Design-Entscheidungen beim Callback-Einsatz
 
 ```mermaid
-graph TD
+flowchart TD
     A[Callback-Design-Entscheidungen] --> B{Ausführungskontext}
     
-    B -->|Synchron| C[Direkter Aufruf]
-    B -->|Asynchron| D[Threadpool-Ausführung]
+    B -->|"Synchron"| C[Direkter Aufruf]
+    B -->|"Asynchron"| D[Threadpool-Ausführung]
     
     C --> E{Granularität}
     D --> F{Fehlerbehandlung}
     
-    E -->|Grobkörnig| G[Wenige, umfangreiche Callbacks]
-    E -->|Feinkörnig| H[Viele, spezifische Callbacks]
+    E -->|"Grobkörnig"| G[Wenige, umfangreiche Callbacks]
+    E -->|"Feinkörnig"| H[Viele, spezifische Callbacks]
     
-    F -->|Einfach| I[Error-Callback übergeben]
-    F -->|Fortgeschritten| J[Retry mit exponential Backoff]
+    F -->|"Einfach"| I[Error-Callback übergeben]
+    F -->|"Fortgeschritten"| J[Retry mit exponential Backoff]
     
     G --> K[Weniger Overhead, schwieriger zu parallelisieren]
     H --> L[Bessere Parallelisierung, höherer Overhead]
@@ -260,21 +260,21 @@ graph TD
 ## Evolutionspfad für Callback-Pattern
 
 ```mermaid
-graph LR
+flowchart LR
     A[Einfache Callbacks] --> B{Problem: Verschachtelung}
-    B -->|Lösung 1| C[Promise/Future]
-    B -->|Lösung 2| D[Funktionale Ketten]
+    B -->|"Lösung 1"| C[Promise/Future]
+    B -->|"Lösung 2"| D[Funktionale Ketten]
     
     C --> E{Problem: Fehlerbehandlung}
     D --> E
     
-    E -->|Lösung 1| F[Try/Either Monaden]
-    E -->|Lösung 2| G[Reactive Streams]
+    E -->|"Lösung 1"| F[Try/Either Monaden]
+    E -->|"Lösung 2"| G[Reactive Streams]
     
     F --> H{Problem: Skalierbarkeit}
     G --> H
     
-    H -->|Lösung 1| I[Verteilte Systeme]
+    H -->|"Lösung 1"| I[Verteilte Systeme]
     I --> J[Event-getriebene Microservices]
 ```
 
