@@ -11,7 +11,7 @@ class AdapterPatternAnimation(Scene):
         self.show_conclusion()
     
     def create_title(self):
-        # Erstelle Titel für den Lehrfilm
+        """Erstellt die Titelsequenz der Präsentation"""
         title = Text("Das Adapter-Pattern", font_size=72)
         subtitle = Text("Ein strukturelles Entwurfsmuster für verteilte Systeme", 
                      font_size=36).next_to(title, DOWN, buff=0.5)
@@ -20,7 +20,7 @@ class AdapterPatternAnimation(Scene):
         self.play(FadeIn(subtitle), run_time=1)
         self.wait(2)
         
-        # Definition
+        # Definition hinzufügen
         definition = Text(
             "Das Adapter-Pattern ermöglicht die Zusammenarbeit von Klassen\n" +
             "mit inkompatiblen Schnittstellen, indem es eine Klasse in\n" +
@@ -33,7 +33,8 @@ class AdapterPatternAnimation(Scene):
         self.play(FadeOut(title), FadeOut(subtitle), FadeOut(definition))
     
     def explain_basics(self):
-        # Grundstruktur des Adapter-Patterns zeigen
+        """Erklärt die Grundkonzepte des Adapter-Patterns"""
+        # Titel
         title = Text("Grundkonzept des Adapter-Patterns", font_size=48)
         self.play(Write(title))
         self.play(title.animate.to_edge(UP))
@@ -52,6 +53,7 @@ class AdapterPatternAnimation(Scene):
         
         arrows.add(arrow1, arrow1_text, arrow2, arrow2_text, arrow3, arrow3_text)
         
+        # Animation
         self.play(
             Create(client), Create(target), Create(adapter), Create(adaptee),
             Create(arrows)
@@ -59,6 +61,7 @@ class AdapterPatternAnimation(Scene):
         
         self.wait(2)
         
+        # Erklärung
         explanation = Text(
             "Das Adapter-Pattern konvertiert Schnittstellen, um\n" +
             "inkompatible Klassen zusammenarbeiten zu lassen.",
@@ -68,13 +71,15 @@ class AdapterPatternAnimation(Scene):
         self.play(Write(explanation))
         self.wait(3)
         
+        # Aufräumen
         self.play(
             FadeOut(client), FadeOut(target), FadeOut(adapter), FadeOut(adaptee),
             FadeOut(arrows), FadeOut(explanation), FadeOut(title)
         )
     
     def show_protocol_adapter(self):
-        # Protokolladapter: SOAP zu REST
+        """Zeigt ein Beispiel für einen Protokolladapter"""
+        # Titel
         title = Text("Protokolladapter: SOAP zu REST", font_size=48)
         self.play(Write(title))
         self.play(title.animate.to_edge(UP))
@@ -87,7 +92,7 @@ class AdapterPatternAnimation(Scene):
         # Lebenslinien
         client_line, adapter_line, soap_line = self.create_lifelines([client, adapter, soap])
         
-        # Sequenzablauf darstellen
+        # Sequenzablauf
         message_flow = VGroup()
         
         # REST GET Anfrage
@@ -95,24 +100,24 @@ class AdapterPatternAnimation(Scene):
             client_line, adapter_line, 0.5, "get(\"123\")", BLUE
         )
         
-        # Adapter-Aktivierung
-        adapter_activation = Rectangle(height=4, width=0.3, color=YELLOW).set_fill(YELLOW, opacity=0.3)
-        adapter_activation.move_to(adapter_line.get_start() + DOWN*2.5)
+        # Adapter-Aktivierung (Self-Delegation)
+        adapter_activation = Rectangle(height=3.5, width=0.3, color=YELLOW).set_fill(YELLOW, opacity=0.3)
+        adapter_activation.move_to(adapter_line.get_start() + DOWN*2.25)
         adapter_activation.align_to(adapter_line, RIGHT)
         
         # SOAP Request
         soap_arrow, soap_text = self.create_sequence_arrow(
-            adapter_line, soap_line, 2, "executeRequest(soapRequest)", YELLOW
+            adapter_line, soap_line, 1.5, "executeRequest(soapRequest)", YELLOW
         )
         
         # SOAP Response
         soap_response_arrow, soap_response_text = self.create_sequence_arrow(
-            soap_line, adapter_line, 3, "soapResponse", RED, reverse=True
+            soap_line, adapter_line, 2.5, "soapResponse", RED, reverse=True
         )
         
         # REST Response
         rest_response_arrow, rest_response_text = self.create_sequence_arrow(
-            adapter_line, client_line, 4, "restResponse", YELLOW, reverse=True
+            adapter_line, client_line, 3.5, "restResponse", YELLOW, reverse=True
         )
         
         message_flow.add(
@@ -122,57 +127,56 @@ class AdapterPatternAnimation(Scene):
             rest_response_arrow, rest_response_text
         )
         
-        # Code-Beispiel
-        code_box = Rectangle(height=3, width=5, color=WHITE).set_fill(BLACK, opacity=0.8)
-        code_box.to_edge(DOWN, buff=0.5)
-        
-        code_text = """
-        public RestResponse get(String resourceId) {
-            // Erstelle SOAP-Anfrage
-            SoapRequest soapRequest = new SoapRequest("GetResource", resourceId, null);
-            
-            // Rufe SOAP-Service auf
-            SoapResponse response = soapService.executeRequest(soapRequest);
-            
-            // Konvertiere zu REST-Antwort
-            return convertToRestResponse(response);
-        }
-        """
-        
-        code = Code(
-            code=code_text,
-            language="java",
-            font_size=16,
-            line_spacing=0.5,
-            background_stroke_width=0
-        ).move_to(code_box)
-        
+        # Animation
         self.play(
             Create(client), Create(adapter), Create(soap),
             Create(client_line), Create(adapter_line), Create(soap_line)
         )
         self.play(Create(message_flow), run_time=3)
-        self.play(Create(code_box), Write(code))
+        
+        # Code-Beispiel
+        code_box = Rectangle(height=3.5, width=5.5, color=WHITE).set_fill(BLACK, opacity=0.8)
+        code_box.to_edge(DOWN, buff=0.5)
+        
+        code_text = """
+public RestResponse get(String resourceId) {
+    // Erstelle SOAP-Anfrage
+    SoapRequest soapRequest = new SoapRequest(
+        "GetResource", resourceId, null);
+    
+    // Rufe SOAP-Service auf
+    SoapResponse response = soapService.executeRequest(soapRequest);
+    
+    // Konvertiere zu REST-Antwort
+    return convertToRestResponse(response);
+}
+        """
+        
+        code = Text(code_text, font_size=16).move_to(code_box)
+        code_group = VGroup(code_box, code)
+        
+        self.play(Create(code_group))
         
         self.wait(3)
         self.play(
             FadeOut(client), FadeOut(adapter), FadeOut(soap),
             FadeOut(client_line), FadeOut(adapter_line), FadeOut(soap_line),
-            FadeOut(message_flow), FadeOut(code_box), FadeOut(code), FadeOut(title)
+            FadeOut(message_flow), FadeOut(code_group), FadeOut(title)
         )
     
     def show_legacy_adapter(self):
-        # Legacy-System-Adapter
+        """Zeigt ein Beispiel für einen Legacy-System-Adapter"""
+        # Titel
         title = Text("Legacy-System-Adapter", font_size=48)
         self.play(Write(title))
         self.play(title.animate.to_edge(UP))
         
         # Klassenstruktur für Legacy-Adapter
-        modern_ui = self.create_class("UserManagementSystem", BLUE, UP*2, height=1.2)
-        modern_user = self.create_class("User", BLUE, LEFT, modern_ui, 2, height=1.2)
+        modern_ui = self.create_class("UserManagementSystem\n(Interface)", BLUE, UP*2, height=1.2)
+        modern_user = self.create_class("User\nid: String, username: String", BLUE, LEFT, modern_ui, 2, height=1.2)
         adapter_class = self.create_class("LegacyUserSystemAdapter", YELLOW, DOWN, modern_ui, 2, height=1.2)
         legacy_system = self.create_class("LegacyUserSystem", RED, RIGHT, adapter_class, 2, height=1.2)
-        legacy_user = self.create_class("LegacyUser", RED, DOWN, modern_user, 2, height=1.2)
+        legacy_user = self.create_class("LegacyUser\nuserId: int, login: String", RED, DOWN, modern_user, 2, height=1.2)
         
         # Pfeile zwischen Klassen
         arrows = VGroup()
@@ -192,17 +196,20 @@ class AdapterPatternAnimation(Scene):
             convert2_arrow, convert2_text
         )
         
-        # Erklärungstext
-        explanation = Text(
-            "Der Adapter ermöglicht die Integration eines Legacy-Systems in eine moderne Architektur.",
-            font_size=24
-        ).to_edge(DOWN, buff=0.5)
-        
+        # Animation
         self.play(
             Create(modern_ui), Create(modern_user),
             Create(adapter_class), Create(legacy_system), Create(legacy_user),
             Create(arrows), run_time=2
         )
+        
+        # Erklärungstext
+        explanation = Text(
+            "Der Adapter ermöglicht die Integration eines Legacy-Systems in eine moderne Architektur,\n" +
+            "indem er die Datenstrukturen und Methodensignaturen konvertiert.",
+            font_size=24
+        ).to_edge(DOWN, buff=0.5)
+        
         self.play(Write(explanation))
         
         self.wait(3)
@@ -213,7 +220,8 @@ class AdapterPatternAnimation(Scene):
         )
     
     def show_format_adapter(self):
-        # Format-Adapter
+        """Zeigt ein Beispiel für einen Format-Adapter"""
+        # Titel
         title = Text("Format-Adapter für Datenkonvertierung", font_size=48)
         self.play(Write(title))
         self.play(title.animate.to_edge(UP))
@@ -226,17 +234,23 @@ class AdapterPatternAnimation(Scene):
         ).arrange(DOWN, buff=0.1).move_to(data_obj)
         data_group = VGroup(data_obj, data_text).move_to(ORIGIN)
         
-        # Formate
+        # Formate erstellen und positionieren
         xml = self.create_format("XML Format", BLUE, UP+LEFT, data_group, "<data>\n  <id>123</id>\n</data>")
         json = self.create_format("JSON Format", GREEN, UP+RIGHT, data_group, '{\n  "id": "123"\n}')
         csv = self.create_format("Legacy CSV Format", RED, DOWN, data_group, "123;Test;42")
         
         # Konvertierungspfeile
         arrows = VGroup()
+        
+        # XML <-> DataObject
         xml_data, xml_data_text = self.create_arrow(xml, data_group, "fromXml()", LEFT, reverse=True)
         data_xml, data_xml_text = self.create_arrow(data_group, xml, "toXml()", RIGHT)
+        
+        # JSON <-> DataObject
         json_data, json_data_text = self.create_arrow(json, data_group, "fromJson()", LEFT, reverse=True)
         data_json, data_json_text = self.create_arrow(data_group, json, "toJson()", RIGHT)
+        
+        # CSV <-> DataObject
         csv_data, csv_data_text = self.create_arrow(csv, data_group, "LegacyCSVAdapter", LEFT, reverse=True)
         data_csv, data_csv_text = self.create_arrow(data_group, csv, "convertToCSV()", RIGHT)
         
@@ -246,13 +260,14 @@ class AdapterPatternAnimation(Scene):
             csv_data, csv_data_text, data_csv, data_csv_text
         )
         
+        # Animation
         self.play(Create(data_group))
         self.play(Create(xml), Create(json), Create(csv))
         self.play(Create(arrows), run_time=2)
         
         # Erklärungstext
         explanation = Text(
-            "Der LegacyCSVAdapter ermöglicht die Konvertierung zwischen modernen Formaten\n" +
+            "Der Format-Adapter ermöglicht die Konvertierung zwischen modernen Formaten\n" +
             "und dem Legacy-CSV-Format, das von älteren Systemen verwendet wird.",
             font_size=24
         ).to_edge(DOWN, buff=0.5)
@@ -266,7 +281,8 @@ class AdapterPatternAnimation(Scene):
         )
     
     def show_conclusion(self):
-        # Zusammenfassung
+        """Zusammenfassung des Adapter-Patterns"""
+        # Titel
         title = Text("Adapter-Pattern: Zusammenfassung", font_size=48)
         self.play(Write(title))
         self.play(title.animate.to_edge(UP))
@@ -281,16 +297,23 @@ class AdapterPatternAnimation(Scene):
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).to_edge(LEFT, buff=1)
         
         # Vorteile und Nachteile
-        pros_cons = VGroup(
+        pros = VGroup(
             Text("Vorteile:", font_size=28, color=GREEN),
-            Text("• Wiederverwendbarkeit", font_size=20),
-            Text("• Trennung von Schnittstellen", font_size=20),
+            Text("• Wiederverwendbarkeit bestehender Komponenten", font_size=20),
+            Text("• Trennung von Schnittstellen", font_size=20)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        
+        cons = VGroup(
             Text("Nachteile:", font_size=28, color=RED),
             Text("• Zusätzliche Komplexität", font_size=20),
             Text("• Leistungsoverhead", font_size=20)
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).to_edge(RIGHT, buff=1)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2)
         
-        self.play(Write(use_cases), Write(pros_cons), run_time=3)
+        pros_cons = VGroup(pros, cons).arrange(DOWN, aligned_edge=LEFT, buff=0.4)
+        pros_cons.to_edge(RIGHT, buff=1)
+        
+        # Animation
+        self.play(Write(use_cases), Write(pros), Write(cons), run_time=3)
         
         # Fazit
         conclusion = Text(
@@ -341,7 +364,7 @@ class AdapterPatternAnimation(Scene):
         
         return arrow, text
     
-    def create_lifelines(self, objects, color=WHITE):
+    def create_lifelines(self, objects):
         """Erstellt Lebenslinien für Sequenzdiagramme"""
         lifelines = []
         
