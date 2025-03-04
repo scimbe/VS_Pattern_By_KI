@@ -62,21 +62,21 @@ sequenceDiagram
     participant Processing as Verarbeitungsdienst
     participant Webhook as Client-Webhook
     
-    Client->>+PaymentAPI: POST /payments {amount: 100, callback_url: "https://client.com/webhook"}
-    PaymentAPI-->>-Client: HTTP 202 {payment_id: "12345", status: "pending"}
+    Client->>PaymentAPI: POST /payments {amount: 100, callback_url: "https://client.com/webhook"}
+    PaymentAPI-->>Client: HTTP 202 {payment_id: "12345", status: "pending"}
     
-    PaymentAPI->>+Processing: Zahlungsanfrage-Event
+    PaymentAPI->>Processing: Zahlungsanfrage-Event
     Processing->>Processing: Verarbeite Zahlung
     Processing->>Processing: Autorisiere bei Zahlungsanbieter
     
     alt Erfolgreiche Verarbeitung
-        Processing-->>-PaymentAPI: Erfolg: Zahlung autorisiert
-        PaymentAPI->>+Webhook: POST /webhook {payment_id: "12345", status: "completed"}
-        Webhook-->>-PaymentAPI: HTTP 200 OK
+        Processing-->>PaymentAPI: Erfolg: Zahlung autorisiert
+        PaymentAPI->>Webhook: POST /webhook {payment_id: "12345", status: "completed"}
+        Webhook-->>PaymentAPI: HTTP 200 OK
     else Fehlgeschlagene Verarbeitung
-        Processing-->>-PaymentAPI: Fehler: Unzureichendes Guthaben
-        PaymentAPI->>+Webhook: POST /webhook {payment_id: "12345", status: "failed", reason: "insufficient_funds"}
-        Webhook-->>-PaymentAPI: HTTP 200 OK
+        Processing-->>PaymentAPI: Fehler: Unzureichendes Guthaben
+        PaymentAPI->>Webhook: POST /webhook {payment_id: "12345", status: "failed", reason: "insufficient_funds"}
+        Webhook-->>PaymentAPI: HTTP 200 OK
     end
 ```
 
@@ -134,7 +134,7 @@ stateDiagram-v2
 ### 3. Polling-basierte Callbacks für öffentliche Cloud-APIs
 
 ```mermaid
-graph TD
+flowchart TD
     A[Client] -->|1. Starte Dataflow-Job| B[Cloud API]
     B -->|2. Erstelle Job| C[Verarbeitungsdienst]
     B -->|3. Liefere Job-ID| A

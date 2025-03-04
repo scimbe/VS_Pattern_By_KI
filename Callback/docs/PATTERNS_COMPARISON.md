@@ -51,73 +51,73 @@ graph TD
 ### Callback vs. Future/Promise
 
 ```mermaid
-graph LR
+flowchart LR
     A[Vergleich] --> B[Callback]
     A --> C[Future/Promise]
     
-    B --> B1[Zweck: Benachrichtigung über Ergebnis/Fehler]
-    B --> B2[Fokus: Prozedurales Paradigma]
-    B --> B3[Problem: "Callback Hell" bei Verschachtelung]
-    B --> B4[Struktur: Funktionen werden übergeben]
+    B --> B1["Zweck: Benachrichtigung über Ergebnis/Fehler"]
+    B --> B2["Fokus: Prozedurales Paradigma"]
+    B --> B3["Problem: Callback Hell bei Verschachtelung"]
+    B --> B4["Struktur: Funktionen werden übergeben"]
     
-    C --> C1[Zweck: Stellvertreter für ausstehende Ergebnisse]
-    C --> C2[Fokus: Funktionales Paradigma]
-    C --> C3[Vorteil: Methoden-Verkettung vermeidet "Callback Hell"]
-    C --> C4[Struktur: Rückgabe eines Future-Objekts]
+    C --> C1["Zweck: Stellvertreter für ausstehende Ergebnisse"]
+    C --> C2["Fokus: Funktionales Paradigma"]
+    C --> C3["Vorteil: Methoden-Verkettung vermeidet Callback Hell"]
+    C --> C4["Struktur: Rückgabe eines Future-Objekts"]
 ```
 
 ### Callback vs. Observer
 
 ```mermaid
-graph LR
+flowchart LR
     A[Vergleich] --> B[Callback]
     A --> C[Observer]
     
-    B --> B1[Typischerweise 1:1-Beziehung]
-    B --> B2[Unmittelbare Benachrichtigung]
-    B --> B3[Einmaliger Aufruf]
-    B --> B4[Eng gekoppelt: kennt den Empfänger]
+    B --> B1["Typischerweise 1:1-Beziehung"]
+    B --> B2["Unmittelbare Benachrichtigung"]
+    B --> B3["Einmaliger Aufruf"]
+    B --> B4["Eng gekoppelt: kennt den Empfänger"]
     
-    C --> C1[1:n-Beziehung (viele Beobachter)]
-    C --> C2[Kann verzögert benachrichtigen]
-    C --> C3[Mehrere Aufrufe möglich]
-    C --> C4[Lose gekoppelt: kennt Beobachter nicht direkt]
+    C --> C1["1:n-Beziehung (viele Beobachter)"]
+    C --> C2["Kann verzögert benachrichtigen"]
+    C --> C3["Mehrere Aufrufe möglich"]
+    C --> C4["Lose gekoppelt: kennt Beobachter nicht direkt"]
 ```
 
 ### Callback vs. Event-Driven
 
 ```mermaid
-graph LR
+flowchart LR
     A[Vergleich] --> B[Callback]
     A --> C[Event-Driven]
     
-    B --> B1[Zweck: Ergebnis einer Operation]
-    B --> B2[Zeitlich: Fokus auf Beendigung]
-    B --> B3[Struktur: Funktionsübergabe]
-    B --> B4[Kopplung: Direkter Aufruf]
+    B --> B1["Zweck: Ergebnis einer Operation"]
+    B --> B2["Zeitlich: Fokus auf Beendigung"]
+    B --> B3["Struktur: Funktionsübergabe"]
+    B --> B4["Kopplung: Direkter Aufruf"]
     
-    C --> C1[Zweck: Ereignisbehandlung]
-    C --> C2[Zeitlich: Ereignisse jederzeit möglich]
-    C --> C3[Struktur: Event Loop und Handler]
-    C --> C4[Kopplung: Indirekte Kommunikation über Events]
+    C --> C1["Zweck: Ereignisbehandlung"]
+    C --> C2["Zeitlich: Ereignisse jederzeit möglich"]
+    C --> C3["Struktur: Event Loop und Handler"]
+    C --> C4["Kopplung: Indirekte Kommunikation über Events"]
 ```
 
 ### Callback vs. Reactive
 
 ```mermaid
-graph LR
+flowchart LR
     A[Vergleich] --> B[Callback]
     A --> C[Reactive]
     
-    B --> B1[Imperativer Stil]
-    B --> B2[Einzelereignis-orientiert]
-    B --> B3[Manuelles Fehler-Handling]
-    B --> B4[Sequentiell]
+    B --> B1["Imperativer Stil"]
+    B --> B2["Einzelereignis-orientiert"]
+    B --> B3["Manuelles Fehler-Handling"]
+    B --> B4["Sequentiell"]
     
-    C --> C1[Deklarativer Stil]
-    C --> C2[Datenstrom-orientiert]
-    C --> C3[Eingebaute Fehlerbehandlung]
-    C --> C4[Operatoren für Transformation]
+    C --> C1["Deklarativer Stil"]
+    C --> C2["Datenstrom-orientiert"]
+    C --> C3["Eingebaute Fehlerbehandlung"]
+    C --> C4["Operatoren für Transformation"]
 ```
 
 ## Anwendungsfälle verschiedener Muster in Verteilten Systemen
@@ -186,27 +186,27 @@ sequenceDiagram
     participant Op as Operation
     participant Original as OriginalCallback
     
-    Client->>+Retry: execute()
-    Retry->>+Retry: Retry.decorateCallable()
+    Client->>Retry: execute()
+    Retry->>Retry: Retry.decorateCallable()
     
     loop Retry attempts
-        Retry->>+Op: execute operation
+        Retry->>Op: execute operation
         
         alt Success
-            Op-->>-Retry: result
-            Retry->>+Original: onSuccess(result)
-            Original-->>-Retry: return
-            Retry-->>-Client: return
+            Op-->>Retry: result
+            Retry-->>Original: onSuccess(result)
+            Original-->>Retry: return
+            Retry-->>Client: return
         else Error
-            Op-->>-Retry: exception
+            Op-->>Retry: exception
             
             alt Retry limit not reached
                 Note over Retry: Wait backoff time
                 Retry->>Retry: retry attempt
             else Max retries reached
-                Retry->>+Original: onError(exception)
-                Original-->>-Retry: return
-                Retry-->>-Client: return
+                Retry-->>Original: onError(exception)
+                Original-->>Retry: return
+                Retry-->>Client: return
             end
         end
     end

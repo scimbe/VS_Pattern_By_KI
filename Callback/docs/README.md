@@ -271,27 +271,27 @@ sequenceDiagram
     participant Op as Operation
     participant Original as OriginalCallback
 
-    Client->>+Retry: execute()
-    Retry->>+Retry: Retry.decorateCallable()
+    Client->>Retry: execute()
+    Retry->>Retry: Retry.decorateCallable()
 
     loop Retry attempts
-        Retry->>+Op: execute operation
+        Retry->>Op: execute operation
 
         alt Success
-            Op-->>-Retry: result
-            Retry-->>+Original: onSuccess(result)
-            Original-->>-Retry: return
-            Retry-->>-Client: return
+            Op-->>Retry: result
+            Retry-->>Original: onSuccess(result)
+            Original-->>Retry: return
+            Retry-->>Client: return
         else Error
-            Op-->>-Retry: exception
+            Op-->>Retry: exception
             
             alt Retry limit not reached
                 Note over Retry: Wait backoff time
                 Retry->>Retry: retry attempt
             else Max retries reached
-                Retry->>+Original: onError(exception)
-                Original-->>-Retry: return
-                Retry-->>-Client: return
+                Retry-->>Original: onError(exception)
+                Original-->>Retry: return
+                Retry-->>Client: return
             end
         end
     end
@@ -375,10 +375,10 @@ stateDiagram-v2
 ### Grundlegendes Callback-Aktivitätsdiagramm
 
 ```mermaid
-graph TD
+flowchart TD
     A[Start] --> B{Asynchron?}
     B -->|Nein| C[Führe Operation synchron aus]
-    B -->|Ja| D[Erstelle Task im Thread-Pool] 
+    B -->|Ja| D[Erstelle Task im Thread-Pool]
 
     C --> E{Erfolgreich?}
     D --> F[Operation wird asynchron ausgeführt]
@@ -394,7 +394,7 @@ graph TD
 ### Polling Callback-Aktivitätsdiagramm
 
 ```mermaid
-graph TD
+flowchart TD
     A[Client: Start Operation] --> B[Server: Starte asynchrone Verarbeitung]
     B --> C[Server: Gib Operation-ID zurück]
     C --> D[Client: Beginne Polling]
@@ -418,7 +418,7 @@ graph TD
 ### Moderne CompletableFuture-Aktivitätsdiagramm
 
 ```mermaid
-graph TD
+flowchart TD
     A[Start] --> B[Erstelle CompletableFuture]
     B --> C[Führe Operation asynchron aus]
     C --> D{Erfolgreich?}
