@@ -3,9 +3,12 @@ package de.becke.vs.pattern.interceptor;
 import de.becke.vs.pattern.interceptor.caching.CachingInterceptor;
 import de.becke.vs.pattern.interceptor.core.Context;
 import de.becke.vs.pattern.interceptor.core.Dispatcher;
+import de.becke.vs.pattern.interceptor.core.Interceptor;
 import de.becke.vs.pattern.interceptor.http.AuthenticationInterceptor;
 import de.becke.vs.pattern.interceptor.logging.LoggingInterceptor;
 import de.becke.vs.pattern.interceptor.performance.PerformanceInterceptor;
+import de.becke.vs.pattern.interceptor.pipeline.DistributedPipelineDemo;
+import de.becke.vs.pattern.interceptor.pipeline.PipelineDemo;
 import de.becke.vs.pattern.interceptor.security.SecurityInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +40,12 @@ public class Main {
         
         // Fehlerbehandlung demonstrieren
         demonstrateErrorHandling();
+        
+        // Pipeline-Interceptor Pattern demonstrieren
+        demonstratePipelineInterceptors();
+        
+        // Verteiltes Pipeline-Interceptor Pattern demonstrieren
+        demonstrateDistributedPipelineInterceptors();
         
         LOGGER.info("Demonstration abgeschlossen");
     }
@@ -267,6 +276,22 @@ public class Main {
         LOGGER.info("Operation abgeschlossen mit Ergebnis: {}", context.getResult());
         LOGGER.info("Fehler wurde behandelt: {}", context.getAttribute("error.handled"));
         LOGGER.info("Fehlermeldung: {}", context.getAttribute("error.message"));
+    }
+    
+    /**
+     * Demonstriert die Verwendung von Pipeline-Interceptoren.
+     */
+    private static void demonstratePipelineInterceptors() {
+        LOGGER.info("\n--- Pipeline-Interceptor-Demonstration ---");
+        PipelineDemo.runDemo();
+    }
+    
+    /**
+     * Demonstriert die Verwendung von verteilten Pipeline-Interceptoren.
+     */
+    private static void demonstrateDistributedPipelineInterceptors() {
+        LOGGER.info("\n--- Verteilte Pipeline-Interceptor-Demonstration ---");
+        DistributedPipelineDemo.runDemo();
     }
     
     /**
