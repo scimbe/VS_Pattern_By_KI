@@ -279,7 +279,7 @@ sequenceDiagram
 
         alt Success
             Op-->>-Retry: result
-            Retry-->>+Original: onSuccess(result) 
+            Retry-->>+Original: onSuccess(result)
             Original-->>-Retry: return
             Retry-->>-Client: return
         else Error
@@ -287,9 +287,9 @@ sequenceDiagram
             
             alt Retry limit not reached
                 Note over Retry: Wait backoff time
-                Retry->>+Retry: retry attempt
+                Retry->>Retry: retry attempt
             else Max retries reached
-                Retry-->>+Original: onError(exception)
+                Retry->>+Original: onError(exception)
                 Original-->>-Retry: return
                 Retry-->>-Client: return
             end
