@@ -389,8 +389,8 @@ flowchart TD
     I --> J[CompletableFuture zurückgeben]
     J --> K{Auf Ergebnis warten?}
     
-    K --> |Ja| L[Future.get() aufrufen]
-    K --> |Nein| M[Callbacks registrieren]
+    K ---> |Ja| L[Future.get aufrufen]
+    K ---> |Nein| M[Callbacks registrieren]
     
     L --> N[Ergebnis zurückgeben]
     M --> O[Async weiterverarbeiten]
@@ -412,16 +412,16 @@ flowchart TD
     F --> G[Stage 1 Service aufrufen]
     G --> H{Service 1 erfolgreich?}
     
-    H --> |Ja| I[Stage 2 Service aufrufen]
-    H --> |Nein| Q[Fehlerbehandlung]
+    H ---> |Ja| I[Stage 2 Service aufrufen]
+    H ---> |Nein| Q[Fehlerbehandlung]
     
     I --> J{Service 2 erfolgreich?}
-    J --> |Ja| K[Stage 3 Service aufrufen]
-    J --> |Nein| Q
+    J ---> |Ja| K[Stage 3 Service aufrufen]
+    J ---> |Nein| Q
     
     K --> L{Service 3 erfolgreich?}
-    L --> |Ja| M[Ergebnis zurückgeben]
-    L --> |Nein| Q
+    L ---> |Ja| M[Ergebnis zurückgeben]
+    L ---> |Nein| Q
     
     M --> N[Ende]
     Q --> O[Exception werfen]
@@ -435,9 +435,9 @@ flowchart TD
 flowchart TD
     A[Start] --> B{Fehlertyp?}
     
-    B --> |Validierungsfehler| C[Im Kontext speichern]
-    B --> |Technischer Fehler| D[Logging]
-    B --> |Geschäftsfehler| E[Alternative Verarbeitung]
+    B ---> |Validierungsfehler| C[Im Kontext speichern]
+    B ---> |Technischer Fehler| D[Logging]
+    B ---> |Geschäftsfehler| E[Alternative Verarbeitung]
     
     C --> F[PipelineException erstellen]
     D --> F
