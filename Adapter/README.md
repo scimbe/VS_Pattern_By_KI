@@ -163,3 +163,77 @@ Dieses Projekt enthält verschiedene Implementierungen des Adapter-Patterns:
 5. **API-Gateway-Adapter**: Implementierung eines API-Gateways als Adapter für verschiedene Microservices
 
 Jede Implementierung demonstriert die spezifischen Merkmale und Anwendungsfälle der jeweiligen Adapter-Art im Kontext verteilter Systeme.
+
+## Ausführung der Beispielimplementierung
+
+### Vorbereitung in IntelliJ IDEA
+
+1. Öffnen Sie das Projekt in IntelliJ IDEA
+2. Stellen Sie sicher, dass alle Maven-Abhängigkeiten korrekt geladen sind:
+   - Rechtsklick auf `pom.xml`
+   - Wählen Sie "Maven" → "Reload Project"
+
+### Ausführung der Anwendung
+
+Die Hauptmethode befindet sich in der Klasse `de.becke.vs.pattern.adapter.Main`. Um die Anwendung auszuführen:
+
+1. Navigieren Sie zu `src/main/java/de/becke/vs/pattern/adapter/Main.java`
+2. Rechtsklick auf die Datei und wählen Sie "Run 'Main.main()'"
+   - Alternativ: Öffnen Sie die Datei und klicken auf das grüne Play-Symbol in der Gutter neben der `main`-Methode
+
+Die Anwendung führt nacheinander alle Adapter-Beispiele aus und gibt Protokollinformationen in der Konsole aus.
+
+### Über Maven-Terminal
+
+Alternativ können Sie die Anwendung auch über das Maven-Terminal starten:
+
+1. Öffnen Sie das Terminal in IntelliJ (Alt+F12)
+2. Führen Sie den Befehl aus: `mvn compile exec:java`
+
+## Wichtige Aspekte zum Verständnis
+
+Beim Durchlaufen der Beispiele sollten Sie auf folgende Aspekte achten:
+
+### 1. Protokolladapter (SoapToRestAdapter)
+- Beobachten Sie, wie REST-Anfragen in SOAP-Anfragen umgewandelt werden
+- Untersuchen Sie die Klasse `SoapToRestAdapter`, um zu verstehen, wie die Schnittstellen angepasst werden
+- Wichtige Dateien: `SoapToRestAdapter.java`, `RestService.java`, `SoapService.java`
+
+### 2. Formatadapter (LegacyCSVAdapter)
+- Achten Sie auf die Konvertierung zwischen modernen Formaten (XML, JSON) und dem Legacy-CSV-Format
+- Sehen Sie, wie der Adapter die beiden unterschiedlichen Formate überbrückt
+- Wichtige Dateien: `LegacyCSVAdapter.java`, `DataFormatConverter.java`, `LegacyCSVSystem.java`
+
+### 3. Legacy-System-Adapter (LegacyUserSystemAdapter)
+- Beobachten Sie, wie moderne Benutzeranfragen an ein älteres Benutzersystem weitergeleitet werden
+- Achten Sie auf die Umwandlung zwischen verschiedenen Datenmodellen (User vs. LegacyUser)
+- Wichtige Dateien: `LegacyUserSystemAdapter.java`, `UserManagementSystem.java`, `LegacyUserSystem.java`
+
+### 4. Messaging-Adapter (JmsAdapter)
+- Studieren Sie, wie JMS-Nachrichten in das modernere Message-Format konvertiert werden
+- Beachten Sie die Übersetzung der unterschiedlichen Messaging-Konzepte
+- Wichtige Dateien: `JmsAdapter.java`, `MessagingService.java`, `JmsMessageService.java`
+
+### 5. API-Gateway-Adapter (ApiGateway)
+- Verfolgen Sie, wie verschiedene Dienste (UserService, ProductService) hinter einer einheitlichen API zusammengefasst werden
+- Achten Sie auf die Formatkonvertierung zwischen JSON und XML
+- Wichtige Dateien: `ApiGateway.java`, `UserService.java`, `ProductService.java`
+
+## Debugging-Tipps
+
+Um ein tieferes Verständnis zu erlangen:
+
+1. Setzen Sie Breakpoints an wichtigen Stellen im Code:
+   - In den Adapter-Klassen bei den `convert`-Methoden
+   - Bei den Methoden, die die Anfragen delegieren
+   - Bei den Rückgaben der adaptierten Methoden
+
+2. Verwenden Sie die Debug-Ansicht in IntelliJ:
+   - Rechtsklick auf `Main.java` und wählen Sie "Debug 'Main.main()'"
+   - Nutzen Sie die "Variables"-Ansicht, um die Transformation der Daten zu beobachten
+   - Nutzen Sie "Step Into" (F7), um in die Methodenaufrufe hineinzuspringen
+
+3. Experimentieren Sie mit dem Code:
+   - Verändern Sie die Beispielobjekte in den Demo-Klassen
+   - Erweitern Sie die Adapter um zusätzliche Funktionen
+   - Testen Sie Grenzfälle, um die Robustheit der Adapter zu überprüfen
