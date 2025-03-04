@@ -1,4 +1,4 @@
-# VS_Pattern_By_KI
+# VS Pattern (Supported by Claude)
 
 ## Überblick
 
