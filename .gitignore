@@ -12,3 +12,4 @@ logs/
 
 # Ignore log files
 *.log
+/logs/
