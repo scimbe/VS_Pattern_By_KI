@@ -1,0 +1,14 @@
+# Ignore target directories
+target/
+
+# Ignore logs directories
+logs/
+
+# Ignore IntelliJ IDEA project files
+.idea/
+
+# Ignore IntelliJ IDEA module files
+*.iml
+
+# Ignore log files
+*.log
