@@ -2,7 +2,8 @@
 
 ## Überblick
 
-Dieses Repository enthält Beispielimplementierungen verschiedener Entwurfsmuster (Design Patterns), die in der Vorlesung Verteilte Systeme (VS) von Prof. Dr. Martin Becke verwendet werden. Jedes Pattern wurde als eigenständiges Maven-Projekt implementiert, um die praktische Anwendung in verteilten Systemen zu demonstrieren.
+Dieses Repository enthält Beispielimplementierungen verschiedener Entwurfsmuster (Design Patterns), die in der Vorlesung Verteilte Systeme (VS) von Prof. Dr. Martin Becke verwendet werden. Jedes Pattern wurde als eigenständiges Maven-Projekt implementiert, um die praktische Anwendung in verteilten Systemen zu demonstrieren.     
+Zum Test der Integrationsmöglichkeiten von Claude in die Lehre wurde das SE durch Claude begleitet. http://claude.ai.
 
 ## Struktur
 
