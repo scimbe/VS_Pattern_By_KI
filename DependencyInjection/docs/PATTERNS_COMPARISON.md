@@ -230,7 +230,7 @@ graph TD
     
     E --> E1[Keine Framework-Abhängigkeit]
     E --> E2[Vollständige Kontrolle]
-    E --> E3[Keine "Magie"]
+    E --> E3[Keine Magie]
     E --> E4[Mehr Boilerplate-Code]
 ```
 
