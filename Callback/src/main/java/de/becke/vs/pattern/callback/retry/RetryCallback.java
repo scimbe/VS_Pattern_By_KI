@@ -74,9 +74,9 @@ public class RetryCallback<T> implements Callback<T> {
         this.operation = operation;
         this.retry = retry;
         
-        LOGGER.info("RetryCallback erstellt mit Konfiguration: maxAttempts={}, waitDuration={}",
-                retry.getRetryConfig().getMaxAttempts(),
-                retry.getRetryConfig().getIntervalFunction().apply(1));
+        // Log info ohne die problematische IntervalFunction
+        LOGGER.info("RetryCallback erstellt mit maximalen Versuchen: {}",
+                retry.getRetryConfig().getMaxAttempts());
     }
     
     /**

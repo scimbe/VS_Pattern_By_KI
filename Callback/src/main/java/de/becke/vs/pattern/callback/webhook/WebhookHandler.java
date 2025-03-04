@@ -148,7 +148,7 @@ public class WebhookHandler extends AbstractHandler {
      * 
      * @throws Exception Wenn beim Stoppen des Servers ein Fehler auftritt.
      */
-    public void stop() throws Exception {
+    public void stopServer() throws Exception {
         LOGGER.info("Stoppe Webhook-Handler");
         server.stop();
     }

@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class CallbackExample {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CallbackExample.class);
-    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
     /**
      * Führt eine synchrone Operation mit einem Callback aus.
@@ -49,7 +49,7 @@ public class CallbackExample {
     public void performAsynchronousOperation(String data, Callback<String> callback) {
         LOGGER.info("Starte asynchrone Operation mit Daten: {}", data);
         
-        EXECUTOR.submit(() -> {
+        executor.submit(() -> {
             try {
                 // Simuliere eine zeitintensive Verarbeitung
                 TimeUnit.SECONDS.sleep(2);
@@ -76,7 +76,7 @@ public class CallbackExample {
         
         CompletableFuture<String> future = new CompletableFuture<>();
         
-        EXECUTOR.submit(() -> {
+        executor.submit(() -> {
             try {
                 // Simuliere eine zeitintensive Verarbeitung
                 TimeUnit.SECONDS.sleep(2);
@@ -104,7 +104,7 @@ public class CallbackExample {
     public void performProgressOperation(String data, Callback<Integer> progressCallback, Callback<String> finalCallback) {
         LOGGER.info("Starte Operation mit Fortschrittsbenachrichtigungen: {}", data);
         
-        EXECUTOR.submit(() -> {
+        executor.submit(() -> {
             try {
                 // Simuliere eine Operation mit mehreren Schritten
                 StringBuilder resultBuilder = new StringBuilder();
@@ -215,14 +215,14 @@ public class CallbackExample {
      */
     public void shutdown() {
         LOGGER.info("Beende ExecutorService");
-        EXECUTOR.shutdown();
+        executor.shutdown();
         try {
-            if (!EXECUTOR.awaitTermination(5, TimeUnit.SECONDS)) {
-                EXECUTOR.shutdownNow();
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
             }
         } catch (InterruptedException e) {
             LOGGER.error("Shutdown wurde unterbrochen", e);
-            EXECUTOR.shutdownNow();
+            executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
     }

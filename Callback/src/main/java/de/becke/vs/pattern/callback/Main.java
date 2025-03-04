@@ -60,31 +60,33 @@ public class Main {
         
         CallbackExample callbackExample = new CallbackExample();
         
-        // Einfacher synchroner Callback
-        LOGGER.info("1. Einfacher synchroner Callback:");
-        callbackExample.performSynchronousOperation("test-daten", 
-                new CallbackExample.SimpleCallback<>("SynchronerCallback"));
-        
-        // Einfacher asynchroner Callback
-        LOGGER.info("\n2. Einfacher asynchroner Callback:");
-        callbackExample.performAsynchronousOperation("test-daten", 
-                new CallbackExample.SimpleCallback<>("AsynchronerCallback"));
-        
-        // Callback mit Fortschrittsbenachrichtigungen
-        LOGGER.info("\n3. Callback mit Fortschrittsbenachrichtigungen:");
-        callbackExample.performProgressOperation("dies ist ein test",
-                new CallbackExample.SimpleCallback<>("Fortschritt"),
-                new CallbackExample.SimpleCallback<>("Endergebnis"));
-        
-        // Verschachtelte Callbacks
-        LOGGER.info("\n4. Verschachtelte Callbacks (Callback Hell):");
-        callbackExample.performNestedCallbacks("initial-daten",
-                new CallbackExample.SimpleCallback<>("FinalerCallback"));
-        
-        // Warte auf den Abschluss asynchroner Operationen
-        sleep(5000);
-        
-        callbackExample.shutdown();
+        try {
+            // Einfacher synchroner Callback
+            LOGGER.info("1. Einfacher synchroner Callback:");
+            callbackExample.performSynchronousOperation("test-daten", 
+                    new CallbackExample.SimpleCallback<>("SynchronerCallback"));
+            
+            // Einfacher asynchroner Callback
+            LOGGER.info("\n2. Einfacher asynchroner Callback:");
+            callbackExample.performAsynchronousOperation("test-daten", 
+                    new CallbackExample.SimpleCallback<>("AsynchronerCallback"));
+            
+            // Callback mit Fortschrittsbenachrichtigungen
+            LOGGER.info("\n3. Callback mit Fortschrittsbenachrichtigungen:");
+            callbackExample.performProgressOperation("dies ist ein test",
+                    new CallbackExample.SimpleCallback<>("Fortschritt"),
+                    new CallbackExample.SimpleCallback<>("Endergebnis"));
+            
+            // Verschachtelte Callbacks
+            LOGGER.info("\n4. Verschachtelte Callbacks (Callback Hell):");
+            callbackExample.performNestedCallbacks("initial-daten",
+                    new CallbackExample.SimpleCallback<>("FinalerCallback"));
+            
+            // Warte auf den Abschluss asynchroner Operationen
+            sleep(5000);
+        } finally {
+            callbackExample.shutdown();
+        }
     }
 
     /**
@@ -210,33 +212,36 @@ public class Main {
         
         CallbackExample callbackExample = new CallbackExample();
         
+        // Einfaches CompletableFuture
+        LOGGER.info("1. Einfaches CompletableFuture:");
+        CompletableFuture<String> future = callbackExample.performAsynchronousOperationWithFuture("future-daten");
+        
+        future.thenAccept(result -> {
+            LOGGER.info("Future-Ergebnis erhalten: {}", result);
+        }).exceptionally(ex -> {
+            LOGGER.error("Future-Fehler: {}", ex.getMessage());
+            return null;
+        });
+        
+        // Verkettete CompletableFutures
+        LOGGER.info("\n2. Verkettete CompletableFutures:");
+        CompletableFuture<String> chainedFuture = callbackExample.performChainedFutures("verkettete-daten");
+        
+        chainedFuture.thenAccept(result -> {
+            LOGGER.info("Verkettetes Future-Ergebnis erhalten: {}", result);
+        }).exceptionally(ex -> {
+            LOGGER.error("Verketteter Future-Fehler: {}", ex.getMessage());
+            return null;
+        });
+        
+        // Warte auf den Abschluss der asynchronen Operationen
         try {
-            // Einfaches CompletableFuture
-            LOGGER.info("1. Einfaches CompletableFuture:");
-            CompletableFuture<String> future = callbackExample.performAsynchronousOperationWithFuture("future-daten");
-            
-            future.thenAccept(result -> {
-                LOGGER.info("Future-Ergebnis erhalten: {}", result);
-            }).exceptionally(ex -> {
-                LOGGER.error("Future-Fehler: {}", ex.getMessage());
-                return null;
-            });
-            
-            // Verkettete CompletableFutures
-            LOGGER.info("\n2. Verkettete CompletableFutures:");
-            callbackExample.performChainedFutures("verkettete-daten")
-                    .thenAccept(result -> {
-                        LOGGER.info("Verkettetes Future-Ergebnis erhalten: {}", result);
-                    })
-                    .exceptionally(ex -> {
-                        LOGGER.error("Verketteter Future-Fehler: {}", ex.getMessage());
-                        return null;
-                    });
-            
-            // Warte auf den Abschluss der asynchronen Operationen
-            sleep(10000);
-            
+            // Warte explizit auf beide Futures
+            CompletableFuture.allOf(future, chainedFuture).get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOGGER.error("Fehler beim Warten auf CompletableFutures: {}", e.getMessage());
         } finally {
+            // Shutdown erst NACH Abschluss oder Timeout
             callbackExample.shutdown();
         }
     }

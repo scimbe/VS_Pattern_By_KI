@@ -70,7 +70,7 @@ public abstract class AsyncOperation<T> {
         EXECUTOR.submit(() -> {
             try {
                 // Führe die eigentliche Implementierung aus
-                T operationResult = executeAsync();
+                T operationResult = performExecution();
                 LOGGER.info("Operation '{}' erfolgreich abgeschlossen", operationId);
                 
                 // Setze das Ergebnis und aktualisiere den Status
@@ -199,7 +199,7 @@ public abstract class AsyncOperation<T> {
      * @return Das Ergebnis der Operation.
      * @throws Exception Wenn bei der Ausführung ein Fehler auftritt.
      */
-    private T executeAsync() throws Exception {
+    private T performExecution() throws Exception {
         LOGGER.debug("Führe asynchrone Operation '{}' aus", operationId);
         return doExecute();
     }

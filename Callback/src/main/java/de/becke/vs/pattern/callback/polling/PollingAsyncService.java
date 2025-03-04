@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -21,8 +22,9 @@ public class PollingAsyncService {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(PollingAsyncService.class);
     
-    // Ein Thread-Pool für die asynchrone Ausführung
+    // Thread-Pools für die asynchrone Ausführung
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     // Speichert Informationen über laufende Operationen
     private final Map<String, OperationInfo<?>> operations = new HashMap<>();
@@ -196,7 +198,7 @@ public class PollingAsyncService {
      * @param delayMs Die Verzögerung in Millisekunden, nach der die Operation entfernt werden soll.
      */
     private void scheduleCleanup(String operationId, long delayMs) {
-        executor.schedule(() -> {
+        scheduler.schedule(() -> {
             synchronized (operations) {
                 OperationInfo<?> operationInfo = operations.remove(operationId);
                 if (operationInfo != null) {
@@ -211,12 +213,17 @@ public class PollingAsyncService {
      */
     public void shutdown() {
         executor.shutdown();
+        scheduler.shutdown();
         try {
             if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
             }
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
         } catch (InterruptedException e) {
             executor.shutdownNow();
+            scheduler.shutdownNow();
             Thread.currentThread().interrupt();
         }
     }
