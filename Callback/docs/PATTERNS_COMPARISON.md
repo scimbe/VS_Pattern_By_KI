@@ -177,6 +177,41 @@ graph LR
     I --> D
 ```
 
+## Retry Callback-Sequenzdiagramm
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Retry as RetryCallback
+    participant Op as Operation
+    participant Original as OriginalCallback
+    
+    Client->>+Retry: execute()
+    Retry->>+Retry: Retry.decorateCallable()
+    
+    loop Retry attempts
+        Retry->>+Op: execute operation
+        
+        alt Success
+            Op-->>-Retry: result
+            Retry->>+Original: onSuccess(result)
+            Original-->>-Retry: return
+            Retry-->>-Client: return
+        else Error
+            Op-->>-Retry: exception
+            
+            alt Retry limit not reached
+                Note over Retry: Wait backoff time
+                Retry->>Retry: retry attempt
+            else Max retries reached
+                Retry->>+Original: onError(exception)
+                Original-->>-Retry: return
+                Retry-->>-Client: return
+            end
+        end
+    end
+```
+
 ## Vergleichsmatrix: Vor- und Nachteile
 
 | Muster | Stärken | Schwächen | Ideale Anwendungsfälle |
