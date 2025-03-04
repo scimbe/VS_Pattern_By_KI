@@ -53,6 +53,12 @@ public class ApiGateway {
                 return createErrorResponse(400, "Ungültiger Pfad");
             }
             
+            // Überprüfe, ob die HTTP-Methode unterstützt wird
+            if (!method.equals("GET") && !method.equals("POST") && 
+                !method.equals("PUT") && !method.equals("DELETE")) {
+                return createErrorResponse(405, "Methode nicht unterstützt: " + method);
+            }
+            
             String resourceType = pathParts[1];
             String resourceId = pathParts.length > 2 ? pathParts[2] : null;
             
@@ -70,6 +76,17 @@ public class ApiGateway {
                     
                 default:
                     return createErrorResponse(404, "Ressource nicht gefunden: " + resourceType);
+            }
+            
+            // Prüfe, ob die Antwort einen Fehler enthält
+            if (responseBody.contains("\"error\"")) {
+                // Extrahiere den Fehlertext für die Bestimmung des passenden Statuscodes
+                String errorMessage = extractJsonValue(responseBody, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                
+                if (errorMessage.contains("Benutzer-ID erforderlich") || 
+                    errorMessage.contains("Produkt-ID erforderlich")) {
+                    return new ApiResponse(400, responseBody, contentType);
+                }
             }
             
             return new ApiResponse(statusCode, responseBody, contentType);
@@ -117,6 +134,7 @@ public class ApiGateway {
                 }
                 
             default:
+                // Diese Bedingung sollte nicht erreicht werden, da wir bereits im processRequest prüfen
                 return "{ \"error\": \"Methode nicht unterstützt: " + method + "\" }";
         }
     }
@@ -158,6 +176,7 @@ public class ApiGateway {
                 }
                 
             default:
+                // Diese Bedingung sollte nicht erreicht werden, da wir bereits im processRequest prüfen
                 return "<error>Methode nicht unterstützt: " + method + "</error>";
         }
     }
@@ -252,6 +271,24 @@ public class ApiGateway {
         
         if (startIndex >= 0 && endIndex >= 0) {
             return xml.substring(startIndex, endIndex);
+        }
+        
+        return "";
+    }
+    
+    /**
+     * Extrahiert einen Wert aus einer JSON-Zeichenkette.
+     * 
+     * @param json Die JSON-Zeichenkette
+     * @param pattern Das RegEx-Muster
+     * @return Der extrahierte Wert
+     */
+    private String extractJsonValue(String json, String pattern) {
+        java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern);
+        java.util.regex.Matcher matcher = regex.matcher(json);
+        
+        if (matcher.find()) {
+            return matcher.group(1);
         }
         
         return "";
