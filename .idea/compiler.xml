@@ -6,11 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="dependencyinjection" />
+        <module name="pipeline" />
+        <module name="facade" />
+        <module name="interceptor" />
+        <module name="adapter" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="adapter" target="11" />
-      <module name="dependencyinjection" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>

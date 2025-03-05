@@ -8,6 +8,11 @@
         <option value="$PROJECT_DIR$/Callback/pom.xml" />
         <option value="$PROJECT_DIR$/Observer/pom.xml" />
         <option value="$PROJECT_DIR$/Singleton/pom.xml" />
+        <option value="$PROJECT_DIR$/DependencyInjection/pom.xml" />
+        <option value="$PROJECT_DIR$/Adapter/pom.xml" />
+        <option value="$PROJECT_DIR$/Facade/pom.xml" />
+        <option value="$PROJECT_DIR$/Interceptor/pom.xml" />
+        <option value="$PROJECT_DIR$/Pipeline/pom.xml" />
       </list>
     </option>
   </component>
