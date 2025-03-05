@@ -62,17 +62,28 @@ public class AsyncPipeline<I, O> {
     public O execute(I input) throws PipelineException {
         LOGGER.info("Starte Ausführung der asynchronen Pipeline '{}'", name);
         
+        CompletableFuture<O> future = executeAsync(input);
+        
         try {
-            // Führe die Pipeline asynchron aus und warte auf das Ergebnis
-            return executeAsync(input).get();
+            return future.get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new PipelineException("Ausführung der asynchronen Pipeline wurde unterbrochen", e);
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof PipelineException) {
-                throw (PipelineException) e.getCause();
+            Throwable cause = e.getCause();
+            
+            // Wenn die Ursache eine RuntimeException mit einer PipelineException ist, extrahieren wir die PipelineException
+            if (cause instanceof RuntimeException && cause.getCause() instanceof PipelineException) {
+                throw (PipelineException) cause.getCause();
             }
-            throw new PipelineException("Fehler während der asynchronen Ausführung: " + e.getMessage(), e.getCause());
+            
+            // Wenn die Ursache direkt eine PipelineException ist
+            if (cause instanceof PipelineException) {
+                throw (PipelineException) cause;
+            }
+            
+            // Andernfalls verpacken wir die Ursache in einer neuen PipelineException
+            throw new PipelineException("Unerwarteter Fehler in asynchroner Pipeline", cause);
         }
     }
     
@@ -133,12 +144,16 @@ public class AsyncPipeline<I, O> {
                     name, context.getDuration());
             return (O) result;
         }).exceptionally(e -> {
-            LOGGER.error("Asynchrone Pipeline '{}' fehlgeschlagen: {}", name, e.getMessage(), e);
-            if (e.getCause() instanceof PipelineException) {
-                throw new RuntimeException(e.getCause());
+            Throwable cause = e.getCause();
+            LOGGER.error("Asynchrone Pipeline '{}' fehlgeschlagen: {}", name, cause != null ? cause.getMessage() : e.getMessage(), e);
+            
+            // Werfen der originalen Exception, wenn sie eine PipelineException ist
+            if (cause instanceof PipelineException) {
+                throw new RuntimeException(cause);
+            } else {
+                // Verpacken der Ursache in eine neue RuntimeException
+                throw new RuntimeException(cause != null ? cause : e);
             }
-            throw new RuntimeException(
-                    new PipelineException("Fehler in asynchroner Pipeline: " + e.getMessage(), e));
         });
     }
     
