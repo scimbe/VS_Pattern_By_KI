@@ -11,6 +11,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import com.google.inject.name.Names;
+import com.google.inject.Key;
 
 /**
  * Testklasse für den GuiceDIClient.
