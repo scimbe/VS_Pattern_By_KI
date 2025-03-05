@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/VS_Pattern_By_KI.iml" filepath="$PROJECT_DIR$/.idea/VS_Pattern_By_KI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/adapter.iml" filepath="$PROJECT_DIR$/.idea/adapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/dependencyinjection.iml" filepath="$PROJECT_DIR$/.idea/dependencyinjection.iml" />
     </modules>
   </component>
 </project>
