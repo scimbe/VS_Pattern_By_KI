@@ -20,8 +20,8 @@ jobs:
       with:
         java-version: '11'
 
+    - name: Set up Maven
+      uses: actions/setup-maven@v2
+
     - name: Build and test with Maven
-      uses: apache/maven@v3.8.4
-      with:
-        options: -B
-        goals: install
+      run: mvn -B install
