@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -83,7 +83,8 @@ public class ForwardProxy implements RemoteService {
         final String filteredParameter;
         if (contentFilter != null) {
             filteredParameter = contentFilter.filterContent(parameter);
-            if (loggingEnabled && !filteredParameter.equals(parameter)) {
+            // Null-sichere Prüfung, ob die Parameter unterschiedlich sind
+            if (loggingEnabled && !Objects.equals(filteredParameter, parameter)) {
                 LOGGER.info("ForwardProxy: Parameter gefiltert von '{}' zu '{}'", parameter, filteredParameter);
             }
         } else {
@@ -99,7 +100,8 @@ public class ForwardProxy implements RemoteService {
         // Filtere die Antwort, falls Inhaltsfilterung aktiviert ist
         if (contentFilter != null) {
             String filteredResponse = contentFilter.filterContent(response);
-            if (loggingEnabled && !filteredResponse.equals(response)) {
+            // Null-sichere Prüfung, ob die Antworten unterschiedlich sind
+            if (loggingEnabled && !Objects.equals(filteredResponse, response)) {
                 LOGGER.info("ForwardProxy: Antwort gefiltert");
             }
             response = filteredResponse;
@@ -135,7 +137,7 @@ public class ForwardProxy implements RemoteService {
                 filteredOptions[i] = contentFilter.filterContent(options[i]);
             }
             
-            if (loggingEnabled && (!filteredData.equals(data) || hasFilteredOptions(options, filteredOptions))) {
+            if (loggingEnabled && (!Objects.equals(filteredData, data) || hasFilteredOptions(options, filteredOptions))) {
                 LOGGER.info("ForwardProxy: Komplexe Anfragedaten gefiltert");
             }
         } else {
@@ -150,7 +152,7 @@ public class ForwardProxy implements RemoteService {
         // Filtere die Antwort, falls Inhaltsfilterung aktiviert ist
         if (contentFilter != null) {
             String filteredResponse = contentFilter.filterContent(response);
-            if (loggingEnabled && !filteredResponse.equals(response)) {
+            if (loggingEnabled && !Objects.equals(filteredResponse, response)) {
                 LOGGER.info("ForwardProxy: Komplexe Antwort gefiltert");
             }
             response = filteredResponse;
@@ -204,7 +206,7 @@ public class ForwardProxy implements RemoteService {
         }
         
         for (int i = 0; i < original.length; i++) {
-            if (!original[i].equals(filtered[i])) {
+            if (!Objects.equals(original[i], filtered[i])) {
                 return true;
             }
         }

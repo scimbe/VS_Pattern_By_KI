@@ -37,9 +37,9 @@
         
         <!-- Für HTTP-Client-Implementierungen -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.2.1</version>
         </dependency>
         
         <!-- JSON-Verarbeitung -->
@@ -53,12 +53,12 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>11.0.14</version>
+            <version>9.4.48.v20220622</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>11.0.14</version>
+            <version>9.4.48.v20220622</version>
         </dependency>
         
         <!-- Cache-Implementierung -->
@@ -73,6 +73,14 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-x-discovery</artifactId>
             <version>5.4.0</version>
+        </dependency>
+        
+        <!-- Mockito für Tests -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.11.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
