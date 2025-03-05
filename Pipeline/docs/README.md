@@ -16,25 +16,29 @@ Das folgende Diagramm zeigt die Hauptkomponenten des Projekts und ihre Beziehung
 
 ```mermaid
 graph TD
-    Client[Client] --> |verwendet| Pipeline[Pipeline]
+    Client[Client] --> |verwendet| Pipeline[Pipeline Interface]
 
     subgraph "Pipeline-Pattern Grundstruktur"
-        Pipeline --> |enthält| Stage[Pipeline Stage]
-        Pipeline --> |nutzt| Context[Pipeline Context]
-        Context --> |beinhaltet| Metadata[Metadaten]
-        Stage --> |nutzt| Context
+        Pipeline
+        Stage[Pipeline Stage]
+        Context[Pipeline Context]
+        Pipeline --> |besteht aus| Stage
+        Pipeline --> |verwendet| Context
+        Stage --> |verarbeitet| Context
     end
 
     subgraph "Projekt-Implementierungen"
-        SyncPipeline[Synchrone Pipeline] -.-> |implementiert| Pipeline
-        AsyncPipeline[Asynchrone Pipeline] -.-> |implementiert| Pipeline
-        DistPipeline[Verteilte Pipeline] -.-> |implementiert| Pipeline
+        LinearPipeline[Linear Pipeline] -.-> |implementiert| Pipeline
+        ParallelPipeline[Parallel Pipeline] -.-> |implementiert| Pipeline
+        ConditionalPipeline[Conditional Pipeline] -.-> |implementiert| Pipeline
+        DistributedPipeline[Distributed Pipeline] -.-> |implementiert| Pipeline
+        EventDrivenPipeline[Event-driven Pipeline] -.-> |implementiert| Pipeline
     end
 
     Client --> Main[Main Demo]
-    Main --> |verwendet| SyncPipeline
-    Main --> |verwendet| AsyncPipeline
-    Main --> |verwendet| DistPipeline
+    Main --> |verwendet| LinearPipeline
+    Main --> |verwendet| ParallelPipeline
+    Main --> |verwendet| ConditionalPipeline
 ```
 
 ## Klassendiagramme
@@ -46,304 +50,238 @@ Das folgende Diagramm zeigt die allgemeine Struktur des Pipeline-Patterns:
 ```mermaid
 classDiagram
     class Client {
-        +executePipeline()
+        +processPipeline()
     }
 
-    class Pipeline~I, O~ {
-        -name: String
-        -stages: List~PipelineStage~
-        +addStage(stage: PipelineStage): Pipeline
-        +execute(input: I): O
-        +getName(): String
-        +getStages(): List~PipelineStage~
-    }
-
-    class PipelineStage~I, O~ {
+    class Pipeline~C~ {
         <<interface>>
-        +process(input: I, context: PipelineContext): O
-        +getStageName(): String
+        +addStage(stage: Stage~C~): Pipeline~C~
+        +process(context: C): C
     }
 
-    class PipelineContext {
-        -executionId: String
-        -startTime: long
-        -attributes: Map~String, Object~
-        -error: Throwable
-        +setAttribute(key: String, value: Object)
-        +getAttribute(key: String): Object
-        +setError(error: Throwable)
-        +getError(): Throwable
-        +getDuration(): long
+    class Stage~C~ {
+        <<interface>>
+        +process(context: C): C
     }
 
-    class PipelineException {
-        +PipelineException(message: String)
-        +PipelineException(message: String, cause: Throwable)
-        +PipelineException(message: String, cause: Throwable, stageName: String)
+    class Context {
+        -data: Map~String, Object~
+        +get(key: String): Object
+        +set(key: String, value: Object): void
+        +containsKey(key: String): boolean
+    }
+
+    class ConcreteStage~C~ {
+        +process(context: C): C
+    }
+
+    class ConcretePipeline~C~ {
+        -stages: List~Stage~C~~
+        +addStage(stage: Stage~C~): Pipeline~C~
+        +process(context: C): C
     }
 
     Client --> Pipeline : uses
-    Pipeline --> PipelineStage : contains
-    Pipeline --> PipelineContext : creates
-    PipelineStage --> PipelineContext : uses
-    PipelineStage ..> PipelineException : throws
-    Pipeline ..> PipelineException : throws
+    Pipeline --> Stage : contains
+    Stage --> Context : processes
+    ConcreteStage ..|> Stage : implements
+    ConcretePipeline ..|> Pipeline : implements
 ```
 
-### Sequential Pipeline-Klassendiagramm
+### Lineare Pipeline-Klassendiagramm
 
 ```mermaid
 classDiagram
-    class Pipeline~I, O~ {
-        -name: String
-        -stages: List~PipelineStage~
-        +addStage(stage: PipelineStage): Pipeline
-        +execute(input: I): O
-        +getName(): String
-        +getStages(): List~PipelineStage~
-    }
-
-    class PipelineStage~I, O~ {
+    class Pipeline~C~ {
         <<interface>>
-        +process(input: I, context: PipelineContext): O
-        +getStageName(): String
+        +addStage(stage: Stage~C~): Pipeline~C~
+        +process(context: C): C
     }
 
-    class PipelineContext {
-        -executionId: String
-        -startTime: long
-        -attributes: Map~String, Object~
-        -error: Throwable
-        +setAttribute(key: String, value: Object)
-        +getAttribute(key: String): Object
+    class Stage~C~ {
+        <<interface>>
+        +process(context: C): C
     }
 
-    class TextToUpperCaseStage {
-        +process(input: String, context: PipelineContext): String
-        +getStageName(): String
+    class LinearPipeline~C~ {
+        -stages: List~Stage~C~~
+        +addStage(stage: Stage~C~): Pipeline~C~
+        +process(context: C): C
     }
 
-    class RemoveSpacesStage {
-        +process(input: String, context: PipelineContext): String
-        +getStageName(): String
-    }
-
-    class AddPrefixStage {
-        -prefix: String
-        +process(input: String, context: PipelineContext): String
-        +getStageName(): String
+    class SimpleStage~C~ {
+        -processor: Function~C, C~
+        +process(context: C): C
     }
     
-    Pipeline --> PipelineStage : contains
-    Pipeline --> PipelineContext : creates
-    TextToUpperCaseStage ..|> PipelineStage : implements
-    RemoveSpacesStage ..|> PipelineStage : implements
-    AddPrefixStage ..|> PipelineStage : implements
+    LinearPipeline ..|> Pipeline : implements
+    SimpleStage ..|> Stage : implements
+    LinearPipeline --> Stage : contains
 ```
 
-### Asynchrone Pipeline-Klassendiagramm
+### Parallele Pipeline-Klassendiagramm
 
 ```mermaid
 classDiagram
-    class AsyncPipeline~I, O~ {
-        -name: String
-        -stages: List~AsyncPipelineStage~
-        +addStage(stage: AsyncPipelineStage): AsyncPipeline
-        +execute(input: I): O
-        +executeAsync(input: I): CompletableFuture~O~
-        +getName(): String
-        +getStages(): List~AsyncPipelineStage~
-    }
-
-    class AsyncPipelineStage~I, O~ {
+    class Pipeline~C~ {
         <<interface>>
-        +processAsync(input: I, context: PipelineContext): CompletableFuture~O~
-        +getStageName(): String
+        +addStage(stage: Stage~C~): Pipeline~C~
+        +process(context: C): C
     }
 
-    class PipelineContext {
-        -executionId: String
-        -startTime: long
-        -attributes: Map~String, Object~
-        -error: Throwable
-        +setAttribute(key: String, value: Object)
-        +getAttribute(key: String): Object
+    class ParallelPipeline~C~ {
+        -stages: List~Stage~C~~
+        -executor: ExecutorService
+        +addStage(stage: Stage~C~): Pipeline~C~
+        +process(context: C): C
+        +processAsync(context: C): CompletableFuture~C~
     }
 
-    class CompletableFuture~T~ {
-        +thenApply(Function~T,U~): CompletableFuture~U~
-        +thenAccept(Consumer~T~): CompletableFuture~Void~
-        +thenCompose(Function~T,CompletableFuture~U~~): CompletableFuture~U~
-        +exceptionally(Function~Throwable,T~): CompletableFuture~T~
-        +get(): T
+    class Context {
+        -data: Map~String, Object~
+        -threadSafeData: ConcurrentHashMap~String, Object~
+        +get(key: String): Object
+        +set(key: String, value: Object): void
+        +containsKey(key: String): boolean
     }
     
-    AsyncPipeline --> AsyncPipelineStage : contains
-    AsyncPipeline --> PipelineContext : creates
-    AsyncPipelineStage --> CompletableFuture : returns
+    ParallelPipeline ..|> Pipeline : implements
+    ParallelPipeline --> Context : processes
 ```
 
-### Verteilte Pipeline-Klassendiagramm
+### Conditional Pipeline-Klassendiagramm
 
 ```mermaid
 classDiagram
-    class DistributedPipeline~I, O~ {
-        -name: String
-        -stageEndpoints: Map~String, ServiceEndpoint~
-        -stageSequence: List~String~
-        +registerStage(stageName: String, endpoint: ServiceEndpoint): DistributedPipeline
-        +execute(input: I): O
-        +getName(): String
+    class ConditionalPipeline~C~ {
+        -defaultStages: List~Stage~C~~
+        -conditions: Map~Predicate~C~, List~Stage~C~~~
+        +addStage(stage: Stage~C~): Pipeline~C~
+        +addConditionalStage(condition: Predicate~C~, stage: Stage~C~): ConditionalPipeline~C~
+        +process(context: C): C
     }
 
-    class ServiceEndpoint~I, O~ {
-        <<interface>>
-        +invokeService(input: I, context: PipelineContext): O
-        +getEndpointAddress(): String
-    }
-
-    class PipelineContext {
-        -executionId: String
-        -startTime: long
-        -attributes: Map~String, Object~
-        -error: Throwable
-        +setAttribute(key: String, value: Object)
-        +getAttribute(key: String): Object
+    class ConditionalStage~C~ {
+        -condition: Predicate~C~
+        -trueStage: Stage~C~
+        -falseStage: Stage~C~
+        +process(context: C): C
     }
     
-    DistributedPipeline --> ServiceEndpoint : contains
-    DistributedPipeline --> PipelineContext : creates
+    ConditionalPipeline ..|> Pipeline : implements
+    ConditionalStage ..|> Stage : implements
 ```
 
 ## Sequenzdiagramme
 
-### Sequentielle Pipeline-Sequenzdiagramm
+### Lineare Pipeline-Sequenzdiagramm
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Pipeline
+    participant Pipeline as LinearPipeline
     participant Stage1
     participant Stage2
     participant Stage3
     participant Context
 
-    Client->>+Pipeline: execute(input)
-    Pipeline->>+Context: create
-    Context-->>-Pipeline: context
+    Client->>+Pipeline: process(context)
+    Pipeline->>+Stage1: process(context)
+    Stage1->>Context: get/set data
+    Stage1-->>-Pipeline: return modified context
     
-    Pipeline->>+Stage1: process(input, context)
-    Stage1-->>-Pipeline: result1
+    Pipeline->>+Stage2: process(context)
+    Stage2->>Context: get/set data
+    Stage2-->>-Pipeline: return modified context
     
-    Pipeline->>+Stage2: process(result1, context)
-    Stage2-->>-Pipeline: result2
+    Pipeline->>+Stage3: process(context)
+    Stage3->>Context: get/set data
+    Stage3-->>-Pipeline: return modified context
     
-    Pipeline->>+Stage3: process(result2, context)
-    Stage3-->>-Pipeline: result3
-    
-    Pipeline-->>-Client: result3
+    Pipeline-->>-Client: return final context
 ```
 
-### Asynchrone Pipeline-Sequenzdiagramm
+### Parallele Pipeline-Sequenzdiagramm
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant AsyncPipeline
+    participant Pipeline as ParallelPipeline
+    participant Executor
     participant Stage1
     participant Stage2
     participant Stage3
     participant Context
 
-    Client->>+AsyncPipeline: executeAsync(input)
-    AsyncPipeline->>+Context: create
-    Context-->>-AsyncPipeline: context
+    Client->>+Pipeline: processAsync(context)
+    Pipeline->>Pipeline: create shallow copy of context for each stage
     
-    AsyncPipeline->>+Stage1: processAsync(input, context)
-    Stage1-->>-AsyncPipeline: CompletableFuture<result1>
+    Pipeline->>+Executor: submit Stage1 task
+    Pipeline->>+Executor: submit Stage2 task
+    Pipeline->>+Executor: submit Stage3 task
     
-    AsyncPipeline->>+Stage2: processAsync(result1, context)
-    Stage2-->>-AsyncPipeline: CompletableFuture<result2>
+    par Execution in parallel
+        Executor->>+Stage1: process(contextCopy1)
+        Stage1->>Context: get/set data
+        Stage1-->>-Executor: return modified contextCopy1
+        
+        Executor->>+Stage2: process(contextCopy2)
+        Stage2->>Context: get/set data
+        Stage2-->>-Executor: return modified contextCopy2
+        
+        Executor->>+Stage3: process(contextCopy3)
+        Stage3->>Context: get/set data
+        Stage3-->>-Executor: return modified contextCopy3
+    end
     
-    AsyncPipeline->>+Stage3: processAsync(result2, context)
-    Stage3-->>-AsyncPipeline: CompletableFuture<result3>
-    
-    AsyncPipeline-->>-Client: CompletableFuture<result3>
-    
-    Note over Client,AsyncPipeline: Client kann auf CompletableFuture warten oder Callbacks registrieren
-```
-
-### Verteilte Pipeline-Sequenzdiagramm 
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant DistPipeline as DistributedPipeline
-    participant Context
-    participant Service1
-    participant Service2
-    participant Service3
-    
-    Client->>+DistPipeline: execute(input) 
-    DistPipeline->>+Context: create
-    Context-->>-DistPipeline: context
-
-    DistPipeline->>+Service1: invokeService(input, context)
-    Service1-->>-DistPipeline: result1
-
-    DistPipeline->>+Service2: invokeService(result1, context)
-    Service2-->>-DistPipeline: result2
-
-    DistPipeline->>+Service3: invokeService(result2, context)
-    Service3-->>-DistPipeline: result3
-
-    DistPipeline-->>-Client: result3
+    Pipeline->>Pipeline: merge all modified contexts
+    Pipeline-->>-Client: return CompletableFuture with final context
 ```
 
 ## Zustandsdiagramme
 
-### Pipeline-Ausführungszustandsdiagramm
+### Pipeline-Verarbeitungszustandsdiagramm
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Initialisierung
-
-    Initialisierung --> Stage1 : Erste Stage ausführen
-    Stage1 --> Stage2 : Erfolgreich
-    Stage1 --> Fehlerzustand : Fehler
+    [*] --> Initialized
     
-    Stage2 --> Stage3 : Erfolgreich
-    Stage2 --> Fehlerzustand : Fehler
+    Initialized --> Processing: process() called
     
-    Stage3 --> Abgeschlossen : Erfolgreich
-    Stage3 --> Fehlerzustand : Fehler
+    Processing --> StageExecution: for each stage
+    StageExecution --> StageExecution: next stage
+    StageExecution --> Completed: all stages processed
+    StageExecution --> Failed: stage error
     
-    Abgeschlossen --> [*]
-    Fehlerzustand --> [*]
+    Completed --> [*]: return context
+    Failed --> [*]: throw exception
 ```
 
-### Asynchrone Pipeline-Zustandsdiagramm
+### Parallele Pipeline-Zustandsdiagramm
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Initialisierung
-
-    Initialisierung --> AsyncStage1 : Future initialisieren
-    AsyncStage1 --> AsyncStage2 : thenCompose()
-    AsyncStage1 --> Fehlerzustand : exceptionally()
+    [*] --> Initialized
     
-    AsyncStage2 --> AsyncStage3 : thenCompose()
-    AsyncStage2 --> Fehlerzustand : exceptionally()
+    Initialized --> ContextCopying: processAsync() called
+    ContextCopying --> ParallelExecution: contexts prepared
     
-    AsyncStage3 --> Abwarten : CompletableFuture erzeugt
-    AsyncStage3 --> Fehlerzustand : exceptionally()
+    ParallelExecution --> Stage1Execution
+    ParallelExecution --> Stage2Execution
+    ParallelExecution --> Stage3Execution
     
-    Abwarten --> Abgeschlossen : .get() oder .join() aufgerufen
-    Abwarten --> Callback : .thenAccept() registriert
+    Stage1Execution --> ResultCollecting: stage completed
+    Stage2Execution --> ResultCollecting: stage completed
+    Stage3Execution --> ResultCollecting: stage completed
     
-    Callback --> [*]
-    Abgeschlossen --> [*]
-    Fehlerzustand --> [*]
+    ResultCollecting --> MergeResults: all stages completed
+    ResultCollecting --> HandleFailure: any stage failed
+    
+    MergeResults --> Completed: merge successful
+    HandleFailure --> Failed: set exception on future
+    
+    Completed --> [*]: complete future
+    Failed --> [*]: complete future exceptionally
 ```
 
 ## Aktivitätsdiagramme
@@ -352,103 +290,32 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    A[Start] --> B[Eingabe vorbereiten]
-    B --> C[Pipeline erstellen]
-    C --> D[Stages hinzufügen]
-    D --> E[Pipeline ausführen]
-    
-    E --> F{Stage 1}
-    F --> |Erfolg| G{Stage 2}
-    F --> |Fehler| K[Fehlerbehandlung]
-    
-    G --> |Erfolg| H{Stage 3}
-    G --> |Fehler| K
-    
-    H --> |Erfolg| I[Ergebnis zurückgeben]
-    H --> |Fehler| K
-    
-    I --> J[Ende]
-    K --> L[Exception werfen]
-    L --> J
+    A[Start] --> B[Initialisiere Pipeline mit Stages]
+    B --> C[Initialisiere Kontext mit Eingabedaten]
+    C --> D[Übergebe Kontext an Pipeline]
+    D --> E[Erstes Stage verarbeitet Kontext]
+    E --> F[Nächstes Stage verarbeitet Kontext]
+    F --> G{Weitere Stages?}
+    G -->|Ja| F
+    G -->|Nein| H[Ergebniskontext zurückgeben]
+    H --> I[Ende]
 ```
 
-### Asynchrone Pipeline-Aktivitätsdiagramm
+### Verzweigte Pipeline-Aktivitätsdiagramm
 
 ```mermaid
 flowchart TD
-    A[Start] --> B[Eingabe vorbereiten]
-    B --> C[AsyncPipeline erstellen]
-    C --> D[AsyncStages hinzufügen]
-    D --> E[executeAsync aufrufen]
-    
-    E --> F[CompletableFuture mit Eingabe erstellen]
-    F --> G[Stage 1 als thenCompose verknüpfen]
-    G --> H[Stage 2 als thenCompose verknüpfen]
-    H --> I[Stage 3 als thenCompose verknüpfen]
-    
-    I --> J[CompletableFuture zurückgeben]
-    J --> K{Auf Ergebnis warten?}
-    
-    K ---> |Ja| L[Future.get aufrufen]
-    K ---> |Nein| M[Callbacks registrieren]
-    
-    L --> N[Ergebnis zurückgeben]
-    M --> O[Async weiterverarbeiten]
-    
-    N --> P[Ende]
-    O --> P
-```
-
-### Verteilte Pipeline-Aktivitätsdiagramm
-
-```mermaid
-flowchart TD
-    A[Start] --> B[Eingabe vorbereiten]
-    B --> C[DistributedPipeline erstellen]
-    C --> D[ServiceEndpoints registrieren]
-    D --> E[Reihenfolge der Stages festlegen]
-    E --> F[execute aufrufen]
-    
-    F --> G[Stage 1 Service aufrufen]
-    G --> H{Service 1 erfolgreich?}
-    
-    H ---> |Ja| I[Stage 2 Service aufrufen]
-    H ---> |Nein| Q[Fehlerbehandlung]
-    
-    I --> J{Service 2 erfolgreich?}
-    J ---> |Ja| K[Stage 3 Service aufrufen]
-    J ---> |Nein| Q
-    
-    K --> L{Service 3 erfolgreich?}
-    L ---> |Ja| M[Ergebnis zurückgeben]
-    L ---> |Nein| Q
-    
-    M --> N[Ende]
-    Q --> O[Exception werfen]
-    O --> P[Fehlerinformationen im Kontext speichern]
-    P --> N
-```
-
-### Fehlerbehandlung in der Pipeline
-
-```mermaid
-flowchart TD
-    A[Start] --> B{Fehlertyp?}
-    
-    B ---> |Validierungsfehler| C[Im Kontext speichern]
-    B ---> |Technischer Fehler| D[Logging]
-    B ---> |Geschäftsfehler| E[Alternative Verarbeitung]
-    
-    C --> F[PipelineException erstellen]
-    D --> F
-    E --> G[Alternative Route in Pipeline]
-    
-    F --> H[Pipeline abbrechen]
-    G --> I[Weiter mit nächster Stage]
-    
-    H --> J[Exception nach oben propagieren]
-    I --> K[Ergebnis markieren]
-    
-    J --> L[Ende]
-    K --> L
+    A[Start] --> B[Initialisiere Pipeline]
+    B --> C[Füge bedingte Stages hinzu]
+    C --> D[Initialisiere Kontext]
+    D --> E[Übergebe Kontext an Pipeline]
+    E --> F{Bedingung prüfen}
+    F -->|Wahr| G[Verzweigung A ausführen]
+    F -->|Falsch| H[Verzweigung B ausführen]
+    G --> I[Ergebnis in Kontext speichern]
+    H --> I
+    I --> J[Nächster Schritt oder Ende]
+    J --> K{Weitere Schritte?}
+    K -->|Ja| F
+    K -->|Nein| L[Ende]
 ```

@@ -298,7 +298,7 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-    A[Start: Zustandsänderung] --> B[Subject.setState()]
+    A[Start: Zustandsänderung] --> B[Subject.setState]
     B --> C[Speichere neuen Zustand]
     C --> D[notifyObservers aufrufen]
     D --> E[Kopie der Observer-Liste erstellen]
@@ -307,7 +307,7 @@ flowchart TD
     F -->|Ja| G[Nächsten Observer auswählen]
     G --> H[Observer.update aufrufen]
     H --> I[Observer fragt Zustand ab]
-    I --> J[Observer verarbeitet Zustand]
+
     J --> F
     
     F -->|Nein| K[Ende der Benachrichtigung]

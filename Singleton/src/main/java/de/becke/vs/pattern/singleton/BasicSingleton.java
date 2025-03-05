@@ -3,22 +3,21 @@ package de.becke.vs.pattern.singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+
 /**
- * Eine einfache Implementierung des Singleton-Patterns.
+ * Eine verbesserte Implementierung des Singleton-Patterns.
  * 
- * Diese Klasse demonstriert die grundlegende Implementierung des Singleton-Patterns,
- * bei der eine einzige Instanz der Klasse erstellt und über eine statische Methode
- * darauf zugegriffen wird.
- * 
- * Hinweis: Diese Implementierung ist nicht thread-sicher. Für eine thread-sichere 
- * Implementierung siehe {@link ThreadSafeSingleton}.
+ * Diese Klasse demonstriert eine thread-sichere und serialisierbare Implementierung
+ * des Singleton-Patterns, die besser für den Einsatz in Microservices geeignet ist.
  */
-public class BasicSingleton {
+public class BasicSingleton implements Serializable {
     
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSingleton.class);
     
-    // Die einzige Instanz dieser Klasse
-    private static BasicSingleton instance;
+    // Die einzige Instanz dieser Klasse mit volatile für bessere Thread-Sicherheit
+    private static volatile BasicSingleton instance;
     
     // Die Singleton-Klasse könnte einen internen Zustand speichern
     private String data;
@@ -33,14 +32,18 @@ public class BasicSingleton {
     
     /**
      * Gibt die einzige Instanz der Klasse zurück.
-     * Wenn die Instanz noch nicht existiert, wird sie erstellt.
+     * Diese Implementierung ist thread-sicher durch Double-Checked Locking.
      *
      * @return die einzige Instanz von BasicSingleton
      */
     public static BasicSingleton getInstance() {
         if (instance == null) {
-            LOGGER.info("Erzeuge neue BasicSingleton-Instanz");
-            instance = new BasicSingleton();
+            synchronized (BasicSingleton.class) {
+                if (instance == null) {
+                    LOGGER.info("Erzeuge neue BasicSingleton-Instanz");
+                    instance = new BasicSingleton();
+                }
+            }
         }
         return instance;
     }
@@ -71,5 +74,15 @@ public class BasicSingleton {
     public String getRemoteData() {
         LOGGER.info("Hole Daten von entferntem System (simuliert)");
         return "Remote-Daten: " + data;
+    }
+    
+    /**
+     * Schützt vor Singleton-Verletzung durch Deserialisierung.
+     * 
+     * @return Die bestehende Singleton-Instanz
+     */
+    protected Object readResolve() {
+        // Gibt die bestehende Instanz zurück und verwirft die deserialisierte Instanz
+        return getInstance();
     }
 }

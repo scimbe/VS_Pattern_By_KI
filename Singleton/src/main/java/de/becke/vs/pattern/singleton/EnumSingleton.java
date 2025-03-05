@@ -18,7 +18,8 @@ public enum EnumSingleton {
     
     INSTANCE;
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnumSingleton.class);
+    // Logger als nicht-statische Variable deklarieren
+    private final Logger logger = LoggerFactory.getLogger(EnumSingleton.class);
     
     // Simulierte Konfigurationseinstellungen für ein verteiltes System
     private final Map<String, String> configuration;
@@ -27,7 +28,7 @@ public enum EnumSingleton {
      * Konstruktor für die Enum-Instanz.
      */
     EnumSingleton() {
-        LOGGER.info("EnumSingleton wird initialisiert");
+        logger.info("EnumSingleton wird initialisiert");
         
         // Simulierte Konfigurationseinstellungen
         configuration = new HashMap<>();
@@ -37,7 +38,7 @@ public enum EnumSingleton {
         configuration.put("cache.timeToLive", "3600");
         configuration.put("system.mode", "production");
         
-        LOGGER.info("Konfiguration geladen mit {} Einstellungen", configuration.size());
+        logger.info("Konfiguration geladen mit {} Einstellungen", configuration.size());
     }
     
     /**
@@ -47,7 +48,7 @@ public enum EnumSingleton {
      * @return der Wert der Konfigurationseinstellung oder null, wenn nicht gefunden
      */
     public String getConfigValue(String key) {
-        LOGGER.debug("Konfigurationswert abgerufen: {}", key);
+        logger.debug("Konfigurationswert abgerufen: {}", key);
         return configuration.get(key);
     }
     
@@ -58,7 +59,7 @@ public enum EnumSingleton {
      * @param value der Wert der Konfigurationseinstellung
      */
     public void setConfigValue(String key, String value) {
-        LOGGER.info("Konfigurationswert geändert: {} = {}", key, value);
+        logger.info("Konfigurationswert geändert: {} = {}", key, value);
         configuration.put(key, value);
     }
     
@@ -76,14 +77,14 @@ public enum EnumSingleton {
      * Simuliert das Anwenden von Konfigurationsänderungen in einem verteilten System.
      */
     public void applyConfigToDistributedSystem() {
-        LOGGER.info("Wende Konfiguration auf verteiltes System an");
+        logger.info("Wende Konfiguration auf verteiltes System an");
         
         // Simuliert einen Network-Call oder eine Broadcast-Operation
         try {
             Thread.sleep(50);
-            LOGGER.info("Konfigurationsänderungen wurden auf alle Knoten übertragen");
+            logger.info("Konfigurationsänderungen wurden auf alle Knoten übertragen");
         } catch (InterruptedException e) {
-            LOGGER.error("Übertragung der Konfiguration unterbrochen", e);
+            logger.error("Übertragung der Konfiguration unterbrochen", e);
             Thread.currentThread().interrupt();
         }
     }

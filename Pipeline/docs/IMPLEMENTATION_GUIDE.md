@@ -18,97 +18,115 @@ Das Pipeline-Pattern ist in folgenden Situationen besonders nützlich:
 ```mermaid
 graph TD
     A[Entscheidungsbaum: Pipeline-Pattern verwenden?] --> B{Sequentielle Verarbeitung?}
-    B -->|Ja| C{Mehrere Transformationsschritte?}
+    B -->|Ja| C{Unabhängige Verarbeitungsschritte?}
     B -->|Nein| D[Andere Patterns erwägen]
     
     C -->|Ja| E[Pipeline-Pattern verwenden]
-    C -->|Nein| F{Zerlegen in Teilaufgaben möglich?}
+    C -->|Nein| F{Datenfluss mit Transformationen?}
     
     F -->|Ja| E
-    F -->|Nein| G{Daten durchlaufen immer gleiche Schritte?}
+    F -->|Nein| G{Wiederverwendbare Verarbeitungskomponenten?}
     
-    G -->|Ja| E
+    G -->|Ja| H{Komplexe Kette von Operationen?}
     G -->|Nein| D
+    
+    H -->|Ja| E
+    H -->|Nein| D
 ```
 
 ## Schrittweise Implementierung
 
-### 1. Pipeline-Schnittstellen definieren
+### 1. Grundkomponenten definieren
 
 ```mermaid
 graph LR
-    A[Pipeline-Schnittstellen definieren] --> B[PipelineStage Interface definieren]
-    B --> C[Pipeline-Klasse erstellen]
-    C --> D[PipelineContext für Metadaten erstellen]
-    D --> E[Fehlerbehandlung hinzufügen]
+    A[Pipeline-Schnittstelle definieren] --> B[Stage-Schnittstelle definieren]
+    B --> C[Context-Klasse implementieren]
+    C --> D[Konkrete Stages implementieren]
+    D --> E[Pipeline-Implementierung erstellen]
 ```
 
-### 2. Pipeline-Stages implementieren
+### 2. Sequentielle Pipeline implementieren
 
 ```mermaid
 graph TD
-    A[Pipeline-Stages erstellen] --> B[Jede Stage mit eigener Verantwortlichkeit]
-    B --> C[Typsichere Ein-/Ausgabe definieren]
-    C --> D[Fehlerbehandlung in jeder Stage]
-    D --> E[Logging für jeden Verarbeitungsschritt]
+    A[Lineare Pipeline erstellen] --> B[Liste für Stages initialisieren]
+    B --> C[addStage-Methode implementieren]
+    C --> D[process-Methode implementieren]
+    D --> E[Stages sequentiell ausführen]
+    E --> F[Fehlerbehandlung hinzufügen]
+    F --> G[Kontextvalidierung einbauen]
 ```
 
 ## Implementierungsbeispiele
 
-### Beispiel 1: Sequentielle Pipeline
+### Beispiel 1: Einfache lineare Pipeline
 
-Dieses Diagramm zeigt den Datenfluss bei der Ausführung einer sequentiellen Pipeline:
+Dieses Diagramm zeigt den Datenfluss bei der Ausführung einer linearen Pipeline:
 
 ```mermaid
 graph LR
-    A[Eingabe] --> B[Pipeline]
-    B --> C{Verarbeitung beginnen}
-    C --> D[Stage 1]
-    D --> E[Stage 2]
-    E --> F[Stage 3]
-    F --> G[Ausgabe]
+    A[Client] --> B[LinearPipeline]
+    B --> C{process}
+    C --> D[Stage 1: Validierung]
+    D --> E[Stage 2: Transformation]
+    E --> F[Stage 3: Anreicherung]
+    F --> G[Stage 4: Persistierung]
+    G --> H[Client erhält Ergebnis]
 ```
 
-### Beispiel 2: Asynchrone Pipeline
+### Beispiel 2: Parallele Pipeline
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Pipeline as AsyncPipeline
-    participant Stage1 as AsyncStage 1
-    participant Stage2 as AsyncStage 2
-    participant Stage3 as AsyncStage 3
+    participant Pipeline as ParallelPipeline
+    participant Executor
     
-    Client->>+Pipeline: executeAsync(input)
-    Pipeline->>+Stage1: processAsync(input)
-    Stage1-->>-Pipeline: CompletableFuture<result1>
+    Client->>+Pipeline: processAsync(input)
+    Pipeline->>Pipeline: create context copies
     
-    Pipeline->>+Stage2: thenCompose(processAsync(result1))
-    Stage2-->>-Pipeline: CompletableFuture<result2>
+    par Parallel Execution
+        Pipeline->>Executor: submit stage 1
+        Pipeline->>Executor: submit stage 2
+        Pipeline->>Executor: submit stage 3
+    end
     
-    Pipeline->>+Stage3: thenCompose(processAsync(result2))
-    Stage3-->>-Pipeline: CompletableFuture<result3>
-    
-    Pipeline-->>-Client: CompletableFuture<finalResult>
+    Pipeline->>Pipeline: collect results
+    Pipeline->>Pipeline: merge contexts
+    Pipeline-->>-Client: return result
+```
+
+### Beispiel 3: Bedingte Pipeline
+
+```mermaid
+graph TD
+    A[Client] --> B[ConditionalPipeline]
+    B --> C{Bedingung?}
+    C -->|Bedingung wahr| D[Stage A]
+    C -->|Bedingung falsch| E[Stage B]
+    D --> F[Gemeinsame Endstufe]
+    E --> F
+    F --> G[Client erhält Ergebnis]
 ```
 
 ## Best Practices
 
 ```mermaid
 graph TD
-    A[Best Practices für Pipeline-Pattern] --> B[Single Responsibility je Stage]
-    A --> C[Fehlerbehandlung pro Stage]
-    A --> D[Kontextweitergabe]
-    A --> E[Monitoring/Logging]
-    A --> F[Typparameter für Typsicherheit]
-    A --> G[Validierung der Ein-/Ausgaben]
+    A[Best Practices für Pipeline-Pattern] --> B[Klare Verantwortlichkeiten]
+    A --> C[Zustandslosigkeit]
+    A --> D[Fehlerbehandlung]
+    A --> E[Erweiterbarkeit]
+    A --> F[Testbarkeit]
+    A --> G[Monitoring]
     
-    B --> B1[Jede Stage macht genau eine Aufgabe]
-    C --> C1[Klare Fehlerbehandlungspolitik definieren]
-    D --> D1[PipelineContext für Metadaten nutzen]
-    E --> E1[Jeden Pipeline-Schritt protokollieren]
-    F --> F1[Generics für typsichere Verkettung]
-    G --> G1[Vorbedingungen vor Verarbeitung prüfen]
+    B --> B1[Jede Stage hat genau eine Aufgabe]
+    C --> C1[Stages sollten keinen internen Zustand halten]
+    D --> D1[Fehlerbehandlung auf Pipeline-Ebene]
+    E --> E1[Einfaches Hinzufügen neuer Stages]
+    F --> F1[Einzelne Stages isoliert testbar]
+    G --> G1[Metriken für Stage-Durchsatz und -Latenz]
 ```
 
 ## Häufige Fehler
@@ -117,77 +135,91 @@ Die folgenden Fehler sollten bei der Implementierung des Pipeline-Patterns vermi
 
 ```mermaid
 graph TD
-    A[Häufige Fehler] --> B[Zu komplexe Stages]
-    A --> C[Zustandsbehaftete Stages]
+    A[Häufige Fehler] --> B[Zu grobkörnige Stages]
+    A --> C[Abhängigkeiten zwischen Stages]
     A --> D[Fehlende Fehlerbehandlung]
-    A --> E[Gemischte Verantwortlichkeiten]
-    A --> F[Pipeline-Verstopfung]
+    A --> E[Ineffiziente Kontextnutzung]
+    A --> F[Race-Conditions in parallelen Pipelines]
     
-    B --> B1[Stages sollten einfach und fokussiert sein]
-    C --> C1[Stages sollten idealerweise zustandslos sein]
-    D --> D1[Jede Stage sollte Fehler behandeln]
-    E --> E1[Keine gemischten Aufgaben in einer Stage]
-    F --> F1[Langsame Stages bremsen die gesamte Pipeline]
+    B --> B1[Zu viel Logik in einer Stage erschwert Wiederverwendung]
+    C --> C1[Abhängigkeiten verhindern Parallelisierung]
+    D --> D1[Fehler in einer Stage bricht gesamte Pipeline ab]
+    E --> E1[Unnötige Kopien des Kontexts zwischen Stages]
+    F --> F1[Ungeschützte Zugriffe auf geteilte Ressourcen]
 ```
 
 ## Performanceüberlegungen
 
 ```mermaid
 graph LR
-    A[Performance-Optimierung] --> B[Asynchrone Verarbeitung]
-    A --> C[Parallelisierung]
-    A --> D[Batching-Verarbeitung]
-    A --> E[Rückdruckmechanismen]
+    A[Performance-Optimierung] --> B[Granularität der Stages]
+    A --> C[Parallelisierungspotential]
+    A --> D[Kontextgröße]
+    A --> E[Thread-Pool-Dimensionierung]
     
-    B --> B1[CompletableFuture/Reactive Streams]
-    C --> C1[Parallele Ausführung unabhängiger Stages]
-    D --> D1[Gruppierung kleiner Aufgaben]
-    E --> E1[Backpressure für hohe Last]
+    B --> B1[Balance zwischen Flexibilität und Overhead]
+    C --> C1[Unabhängige Stages parallel ausführen]
+    D --> D1[Kontextgröße minimieren, nur relevante Daten weitergeben]
+    E --> E1[Thread-Pool an Workload und Systemressourcen anpassen]
 ```
 
 ## Varianten des Pipeline-Patterns
 
 ```mermaid
 graph TD
-    A[Pipeline-Varianten] --> B[Sequentielle Pipeline]
-    A --> C[Asynchrone Pipeline]
-    A --> D[Verteilte Pipeline]
-    A --> E[Parallele Pipeline]
-    A --> F[Dynamische Pipeline]
+    A[Pipeline-Varianten] --> B[Lineare Pipeline]
+    A --> C[Parallele Pipeline]
+    A --> D[Bedingte Pipeline]
+    A --> E[Dynamische Pipeline]
+    A --> F[Verteilte Pipeline]
     
-    B --> B1[Einfache sequentielle Verarbeitung]
-    C --> C1[Asynchrone Verarbeitung mit CompletableFuture]
-    D --> D1[Verteilung auf mehrere Knoten/Services]
-    E --> E1[Parallele Ausführung unabhängiger Stages]
-    F --> F1[Dynamisches Hinzufügen/Entfernen von Stages]
+    B --> B1[Sequentielle Ausführung von Stages]
+    C --> C1[Parallele Ausführung unabhängiger Stages]
+    D --> D1[Bedingte Verzweigungen im Pipelinefluss]
+    E --> E1[Dynamisches Hinzufügen/Entfernen von Stages]
+    F --> F1[Stages verteilt auf verschiedene Knoten]
 ```
 
 ## Herausforderungen in verteilten Systemen
 
 ```mermaid
 graph LR
-    A[Herausforderungen] --> B[Netzwerklatenz]
-    A --> C[Knotenausfälle]
-    A --> D[Konsistenz der Daten]
-    A --> E[Monitoring]
+    A[Herausforderungen] --> B[Zustandskonsistenz]
+    A --> C[Fehlerfortpflanzung]
+    A --> D[Latenz]
+    A --> E[Nachverfolgbarkeit]
     
-    B --> B1[Erhöhte Verarbeitungszeit]
-    C --> C1[Fehlertoleranz und Wiederherstellung]
-    D --> D1[Konsistente Transaktionen über Knoten]
-    E --> E1[Verfolgung des Fortschritts]
+    B --> B1[Konsistente Zustandsreplikation zwischen Knoten]
+    C --> C1[Fehlerbehandlung über Systemgrenzen hinweg]
+    D --> D1[Netzwerklatenz zwischen verteilten Stages]
+    E --> E1[End-to-End-Nachverfolgung über Systemgrenzen]
 ```
 
-## Moderne Erweiterungen des Pipeline-Patterns
+## Skalierung von Pipelines
 
 ```mermaid
 graph TD
-    A[Moderne Erweiterungen] --> B[Reactive Pipelines]
-    A --> C[Event-Sourcing]
-    A --> D[Cloud-native Pipelines]
-    A --> E[ML-Pipelines]
+    A[Skalierungsaspekte] --> B[Horizontale Skalierung]
+    A --> C[Vertikale Skalierung]
+    A --> D[Elastische Skalierung]
+    A --> E[Backpressure]
     
-    B --> B1[Reaktive Streams mit Backpressure]
-    C --> C1[Event-basierte Pipelines mit Wiederherstellung]
-    D --> D1[Container-basierte Pipeline-Stages]
-    E --> E1[Pipelines für maschinelles Lernen]
+    B --> B1[Mehrere Instanzen derselben Pipeline]
+    C --> C1[Mehr Ressourcen pro Pipeline-Stage]
+    D --> D1[Automatisches Skalieren basierend auf Last]
+    E --> E1[Regulierung des Durchsatzes bei Überlastung]
+```
+
+## Moderne Implementierung mit CompletableFuture
+
+```mermaid
+graph TD
+    A[Moderne Pipelines] --> B[CompletableFuture]
+    A --> C[Reactive Streams]
+    A --> D[Actor-Modell]
+    
+    B --> B1[Asynchrone Verkettung von Stages]
+    B --> B2[Non-blocking Pipeline-Ausführung]
+    C --> C1[Datenstrom-Verarbeitung mit Backpressure]
+    D --> D1[Actor-basierte Pipeline-Stages]
 ```

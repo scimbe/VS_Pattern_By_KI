@@ -1,50 +1,54 @@
-# Vergleich des Pipeline-Patterns mit anderen Verarbeitungsmustern
+# Vergleich des Pipeline-Patterns mit anderen Architekturmustern
 
-Dieses Dokument vergleicht das Pipeline-Pattern mit anderen Verarbeitungsmustern und hilft bei der Entscheidung, welches Muster in verschiedenen Situationen am besten geeignet ist.
+Dieses Dokument vergleicht das Pipeline-Pattern mit anderen Entwurfsmustern und hilft bei der Entscheidung, welches Muster in verschiedenen Situationen am besten geeignet ist.
 
-## Pipeline vs. andere Verarbeitungsmuster
+## Pipeline vs. andere Architekturmuster
 
 ```mermaid
 graph TD
-    A[Verarbeitungsmuster] --> B[Pipeline]
+    A[Architekturmuster für sequentielle Verarbeitung] --> B[Pipeline]
     A --> C[Chain of Responsibility]
     A --> D[Decorator]
-    A --> E[Pipes and Filters]
-    A --> F[Saga]
-    A --> G[Mediator]
-    A --> H[MapReduce]
+    A --> E[Interceptor]
+    A --> F[Filter]
+    A --> G[Pipes and Filters]
+    A --> H[Workflow]
     
-    B --- B1[Sequentielle Verarbeitung durch definierte Stages]
-    C --- C1[Verkettete Handler mit Weiterleitung der Anfrage]
-    D --- D1[Schichten von Funktionalität um ein Kernobjekt]
-    E --- E1[Lose gekoppelte Filter verbunden durch Kanäle]
-    F --- F1[Kompensationsaktionen für verteilte Transaktionen]
-    G --- G1[Zentraler Koordinator für Kommunikation]
-    H --- H1[Parallele Verarbeitung und Aggregation von Daten]
+    B --- B1[Fokus auf Datenfluss durch definierte Verarbeitungsstufen]
+    C --- C1[Fokus auf Ereignisbehandlung durch Handlungskette]
+    D --- D1[Fokus auf dynamisches Hinzufügen von Verhalten]
+    E --- E1[Fokus auf Abfangen und Modifizieren von Aufrufen]
+    F --- F1[Fokus auf Datenfilterung mit Ein- und Ausgabe]
+    G --- G1[Fokus auf Komposition von Filtern durch Pipes]
+    H --- H1[Fokus auf Geschäftsprozesse mit Zustandsverwaltung]
 ```
 
 ## Entscheidungshilfe: Welches Muster wann?
 
 ```mermaid
 graph TD
-    A[Welches Verarbeitungsmuster?] --> B{Sequentielle Transformation?}
-    B -->|Ja| C{Fest definierte Schritte?}
-    B -->|Nein| D{Verantwortung delegieren?}
+    A[Welches Muster für sequentielle Verarbeitung?] --> B{Hauptfokus?}
     
-    C -->|Ja| E[Pipeline verwenden]
-    C -->|Nein| F[Pipes and Filters verwenden]
+    B -->|Datenfluss| C{Wiederverwendbare Komponenten?}
+    B -->|Objektverhalten| D{Dynamisches Verhalten?}
+    B -->|Ereignisbehandlung| E{Genau ein Handler?}
+    B -->|Geschäftsprozesse| F[Workflow]
     
-    D -->|Ja| G[Chain of Responsibility verwenden]
-    D -->|Nein| H{Große Datenmengen verarbeiten?}
+    C -->|Ja| G{Unabhängige Verarbeitungseinheiten?}
+    C -->|Nein| H[ETL-Prozess]
     
-    H -->|Ja| I[MapReduce verwenden]
-    H -->|Nein| J{Funktionalität erweitern?}
+    D -->|Ja| I[Decorator]
+    D -->|Nein| J[Template Method]
     
-    J -->|Ja| K[Decorator verwenden]
-    J -->|Nein| L{Verteilte Transaktionen?}
+    E -->|Ja| K[Chain of Responsibility]
+    E -->|Nein| L[Observer]
     
-    L -->|Ja| M[Saga verwenden]
-    L -->|Nein| N[Mediator verwenden]
+    G -->|Ja| M[Pipeline oder Pipes and Filters]
+    G -->|Nein| N[Mediator]
+    
+    M --> O{Verteilte Ausführung notwendig?}
+    O -->|Ja| P[Pipes and Filters]
+    O -->|Nein| Q[Pipeline]
 ```
 
 ## Detaillierter Vergleich: Pipeline vs. andere Muster
@@ -56,15 +60,15 @@ flowchart LR
     A[Vergleich] --> B[Pipeline]
     A --> C[Chain of Responsibility]
     
-    B --> B1["Zweck: Sequentielle Transformation der Daten"]
-    B --> B2["Fokus: Verarbeitung und Transformation"]
-    B --> B3["Jede Stage liefert Ausgabe für die nächste"]
-    B --> B4["Stages haben spezifische Ein-/Ausgabetypen"]
+    B --> B1["Zweck: Transformation von Daten durch festgelegte Stages"]
+    B --> B2["Fokus: Datenflussverarbeitung"]
+    B --> B3["Struktur: Stages sind für Datenverarbeitung optimiert"]
+    B --> B4["Ergebnis: Jede Stage erzeugt Output für nächste Stage"]
     
-    C --> C1["Zweck: Anfrageverarbeitung weiterleiten"]
-    C --> C2["Fokus: Entscheidung und Delegation"]
-    C --> C3["Handler entscheidet über Weiterleitung"]
-    C --> C4["Handler haben in der Regel gleiches Interface"]
+    C --> C1["Zweck: Delegation von Anfragen an Handler"]
+    C --> C2["Fokus: Ereignisbehandlung"]
+    C --> C3["Struktur: Handler entscheiden über Weiterleitung"]
+    C --> C4["Ergebnis: Genau ein Handler bearbeitet Anfrage"]
 ```
 
 ### Pipeline vs. Decorator
@@ -74,15 +78,15 @@ flowchart LR
     A[Vergleich] --> B[Pipeline]
     A --> C[Decorator]
     
-    B --> B1["Sequentielle Transformation durch Stages"]
-    B --> B2["Jede Stage hat eigene Verantwortlichkeit"]
-    B --> B3["Typischerweise lineare Verarbeitung"]
-    B --> B4["Stages können unterschiedliche Ein-/Ausgabetypen haben"]
+    B --> B1["Fokus auf sequentielle Datentransformation"]
+    B --> B2["Stages haben unterschiedliche Verantwortlichkeiten"]
+    B --> B3["Stages verarbeiten einen Kontext"]
+    B --> B4["Feste Struktur nach Initialisierung"]
     
-    C --> C1["Schichtenweise Erweiterung eines Objekts"]
-    C --> C2["Dynamisches Hinzufügen von Funktionalität"]
-    C --> C3["Dekorierte Objekte teilen Interface"]
-    C --> C4["Verschachtelung von Funktionalität"]
+    C --> C1["Fokus auf Hinzufügen von Verhalten"]
+    C --> C2["Decorator und Komponente haben gleiche Schnittstelle"]
+    C --> C3["Decorators umhüllen Kernkomponente"]
+    C --> C4["Dynamische Komposition zur Laufzeit"]
 ```
 
 ### Pipeline vs. Pipes and Filters
@@ -92,63 +96,60 @@ flowchart LR
     A[Vergleich] --> B[Pipeline]
     A --> C[Pipes and Filters]
     
-    B --> B1["Feste Struktur definierter Stages"]
-    B --> B2["Oft strikte Typsicherheit"]
-    B --> B3["Klar definierte Abhängigkeiten"]
-    B --> B4["Zentrales Steuerungskonzept"]
+    B --> B1["Typischerweise innerhalb eines Prozesses"]
+    B --> B2["Oft mit gemeinsamem Kontext-Objekt"]
+    B --> B3["Stages können direkt interagieren"]
+    B --> B4["Optimiert für In-Memory-Verarbeitung"]
     
-    C --> C1["Lose gekoppelte Filter"]
-    C --> C2["Unidirektionale Datenkanäle (Pipes)"]
-    C --> C3["Oft untypisierte Datenströme"]
-    C --> C4["Dezentrales Konzept ohne zentrale Steuerung"]
+    C --> C1["Oft prozessübergreifend"]
+    C --> C2["Unabhängige Filter kommunizieren über Pipes"]
+    C --> C3["Filter kennen einander nicht"]
+    C --> C4["Optimiert für verteilte Systeme"]
 ```
 
-### Pipeline vs. MapReduce
+### Pipeline vs. Workflow
 
 ```mermaid
 flowchart LR
     A[Vergleich] --> B[Pipeline]
-    A --> C[MapReduce]
+    A --> C[Workflow]
     
-    B --> B1["Sequentielle Verarbeitung"]
-    B --> B2["Linear oder verzweigt"]
-    B --> B3["Fokus auf Transformationsschritte"]
-    B --> B4["Kann für verschiedene Datenmengen skaliert werden"]
+    B --> B1["Technisches Pattern für Datenverarbeitung"]
+    B --> B2["Fokus auf Transformation und Verarbeitung"]
+    B --> B3["Linearer oder paralleler Datenfluss"]
+    B --> B4["Zustandslos oder mit kurzlebigem Zustand"]
     
-    C --> C1["Parallele Verarbeitung"]
-    C --> C2["Zwei Hauptphasen: Map und Reduce"]
-    C --> C3["Fokus auf Datenparallelität"]
-    C --> C4["Ideal für sehr große Datenmengen"]
+    C --> C1["Geschäftsorientiertes Pattern"]
+    C --> C2["Fokus auf Geschäftsprozesse"]
+    C --> C3["Komplexe Ablauflogik mit Verzweigungen"]
+    C --> C4["Langlebige Zustandsverwaltung"]
 ```
 
 ## Anwendungsfälle verschiedener Muster
 
 ```mermaid
 graph TD
-    A[Anwendungsfälle Verarbeitungsmuster] --> B[Pipeline]
+    A[Anwendungsfälle] --> B[Pipeline]
     A --> C[Chain of Responsibility]
     A --> D[Decorator]
-    A --> E[MapReduce]
+    A --> E[Pipes and Filters]
     
     B --> B1[ETL-Prozesse]
     B --> B2[Bildverarbeitung]
-    B --> B3[CI/CD-Prozesse]
-    B --> B4[Medienverarbeitung]
+    B --> B3[Dokumentenverarbeitung]
+    B --> B4[Datenaggregation]
     
-    C --> C1[Anfrage-Handler-Ketten]
-    C --> C2[Event-Verarbeitung]
-    C --> C3[Middleware]
-    C --> C4[Validierungsketten]
+    C --> C1[Event-Handling]
+    C --> C2[Anfragenverarbeitung]
+    C --> C3[Validierungsketten]
     
     D --> D1[UI-Komponenten]
     D --> D2[I/O-Streams]
-    D --> D3[Caching-Schichten]
-    D --> D4[Zusätzliche Dienstfunktionalität]
+    D --> D3[Zusätzliche Funktionalität]
     
-    E --> E1[Big Data-Analyse]
-    E --> E2[Suchindizierung]
-    E --> E3[Verteilte Sortierung]
-    E --> E4[Web-Crawling]
+    E --> E1[Datenverarbeitung in verteilten Systemen]
+    E --> E2[Stream-Processing]
+    E --> E3[Unix-Kommandoverkettung]
 ```
 
 ## Kombination von Mustern
@@ -156,98 +157,131 @@ graph TD
 ```mermaid
 graph TD
     A[Muster-Kombinationen] --> B[Pipeline + Decorator]
-    A --> C[Pipeline + Chain of Responsibility]
+    A --> C[Pipeline + Strategy]
     A --> D[Pipeline + Observer]
-    A --> E[Pipeline + Strategy]
+    A --> E[Pipeline + Command]
     
-    B --> B1[Erweiterbare Verarbeitungsstages]
-    C --> C1[Dynamische Verzweigung in Pipelines]
-    D --> D1[Beobachtbare Pipeline mit Fortschrittsnotifikation]
-    E --> E1[Austauschbare Verarbeitungsstrategien in Stages]
+    B --> B1[Erweiterbarer Pipeline mit dynamischen Fähigkeiten]
+    C --> C1[Pipeline mit austauschbaren Verarbeitungsalgorithmen]
+    D --> D1[Pipeline mit Ereignisbenachrichtigungen]
+    E --> E1[Aufzeichnung und Wiederholung von Pipeline-Operationen]
 ```
 
-## Evolutionspfad für Verarbeitungsmuster
+## Evolutionspfad für Datentransformations-Muster
 
 ```mermaid
 graph LR
-    A[Einfache sequentielle Verarbeitung] --> B[Funktionen-Verkettung]
-    B --> C[Objektorientierte Pipeline]
-    C --> D[Generische Pipeline mit Typparametern]
-    D --> E[Asynchrone Pipeline]
-    E --> F[Verteilte Pipeline]
-    F --> G[Reactive Pipeline]
+    A[Einzelne Funktion] --> B[Funktionskette]
+    B --> C[Einfache Pipeline]
+    C --> D[Erweiterte Pipeline]
+    D --> E[Verteilte Pipeline]
+    E --> F[Reaktive Pipeline]
     
-    C --> H[Verminderte Flexibilität]
-    H --> I[Erhöhte Komplexität]
-    I --> E
+    A --> G[Monolithische Verarbeitung]
+    G --> H[Schwierige Wartbarkeit]
+    H --> C
 ```
 
-## Pipeline für mehrere Eingaben
+## Pipeline in verschiedenen Programmierparadigmen
 
 ```mermaid
-sequenceDiagram
-    participant Input1
-    participant Input2
-    participant Fan as Fan-In Stage
-    participant Process as Processing Stage
-    participant Fan2 as Fan-Out Stage
-    participant Output1
-    participant Output2
+flowchart TD
+    A[Pipeline in verschiedenen Paradigmen] --> B[OOP]
+    A --> C[Funktional]
+    A --> D[Reaktiv]
     
-    Input1->>Fan: data1
-    Input2->>Fan: data2
-    Fan->>Process: combinedData
-    Process->>Fan2: processedData
-    Fan2->>Output1: result1
-    Fan2->>Output2: result2
+    B --> B1["Stages als Klassen mit definierter Schnittstelle"]
+    B --> B2["Kontext als Objekt"]
+    B --> B3["Pipeline verwaltet Lebenszyklus der Stages"]
+    
+    C --> C1["Stages als reine Funktionen"]
+    C --> C2["Kontext als unveränderlicher Wert"]
+    C --> C3["Funktionskomposition statt expliziter Pipeline"]
+    
+    D --> D1["Stages als Operatoren auf Datenströmen"]
+    D --> D2["Kontext als Observable/Flowable"]
+    D --> D3["Backpressure und nicht-blockierende Ausführung"]
 ```
 
 ## Vergleichsmatrix: Vor- und Nachteile
 
 | Muster | Stärken | Schwächen | Ideale Anwendungsfälle |
 |--------|---------|-----------|------------------------|
-| Pipeline | Klare Trennung von Verantwortlichkeiten, gute Testbarkeit | Sequentieller Ablauf kann Performance einschränken | ETL-Prozesse, medienverarbeitung, sequentielle Datenverarbeitung |
-| Chain of Responsibility | Flexible Anfragebehandlung, lose Kopplung | Kein garantierter Handler, mögliche Leistungseinbußen | Anfrage-Handling, Filterung, Validierung |
-| Decorator | Dynamische Erweiterbarkeit, Open/Closed-Prinzip | Viele kleine Klassen, komplexe Objektstruktur | Dynamische Funktionalitätserweiterung, I/O-Streams |
-| Pipes and Filters | Lose Kopplung, hohe Wiederverwendbarkeit | Fehlende Kontextinformationen, beschränkte Typprüfung | Streaming-Verarbeitung, Shell-Scripts, Unix-Pipes |
-| MapReduce | Skalierbarkeit, parallele Verarbeitung | Komplexe Implementierung, Overhead | Massendatenverarbeitung, Big Data-Analyse |
-| Saga | Koordination verteilter Transaktionen | Komplexe Fehlerbehandlung und Wiederherstellung | Verteilte Geschäftsprozesse, Microservices |
+| Pipeline | Klare Trennung von Verarbeitungsschritten, Wiederverwendbarkeit von Stages | Kann unflexibel sein, wenn die Pipelinestruktur sich oft ändert | Datentransformationsprozesse, ETL, Bildverarbeitung, sequentielle Verarbeitung mit klaren Schritten |
+| Chain of Responsibility | Flexibel bei der Handhabung von Anfragen, gute Trennung von Belangen | Kein garantiertes Handling, möglicherweise ineffiziente Suche | Ereignisbehandlung, Middlewares, Anfrageverarbeitung mit verschiedenen Handlern |
+| Decorator | Dynamisches Hinzufügen von Verhalten, offenes/geschlossenes Prinzip | Viele kleine Klassen, komplexe Objektstruktur | UI-Komponenten, I/O-Streams, dynamische Erweiterung von Funktionalität |
+| Pipes and Filters | Hohe Modularität, gut für verteilte Systeme | Kommunikationsoverhead, potenziell ineffizient bei kleinen Datenmengen | Stream-Processing, Datenverarbeitung in verteilten Systemen, Unix-Kommandoverkettung |
+| Workflow | Komplexe Geschäftsprozesse mit Zustandsverwaltung | Overhead für einfache Transformationen, komplex zu implementieren | Langlebige Geschäftsprozesse, BPM-Systeme, Prozesse mit menschlicher Interaktion |
 
-## Pipeline-Umsetzung in verschiedenen Paradigmen
+## Adaption des Pipeline-Patterns in verteilten Umgebungen
 
 ```mermaid
 graph TD
-    A[Pipeline-Umsetzungen] --> B[Objektorientiert]
-    A --> C[Funktional]
-    A --> D[Reaktiv]
-    A --> E[Datenstrom-basiert]
+    A[Pipeline in verteilten Systemen] --> B[Lokale Pipeline]
+    A --> C[Cluster-basierte Pipeline]
+    A --> D[Service-basierte Pipeline]
+    A --> E[Event-gesteuerte Pipeline]
     
-    B --> B1[Interface-basierte Stages]
-    C --> C1[Funktionskomposition]
-    D --> D1[Observable/Flow/Flux]
-    E --> E1[Apache Beam, Kafka Streams]
+    B --> B1[Innerhalb einer JVM]
+    C --> C1[Verteilte Ausführung auf Cluster-Knoten]
+    D --> D1[Stages als Microservices]
+    E --> E1[Event-basierte Kommunikation zwischen Stages]
     
-    B1 --> F[Starke Typsicherheit, gute Testbarkeit]
-    C1 --> G[Kompakter Code, weniger Boilerplate]
-    D1 --> H[Backpressure, asynchrone Verarbeitung]
-    E1 --> I[Skalierbarkeit, Fehlertoleranz]
+    B1 --> F[In-Memory-Verarbeitung]
+    C1 --> G[Parallelverarbeitung auf mehreren Knoten]
+    D1 --> H[Lose Kopplung und unabhängige Skalierung]
+    E1 --> I[Asynchrone Verarbeitung mit Message Broker]
+    
+    G --> J[Herausforderung: Datenkonsistenz]
+    H --> K[Herausforderung: Service-Orchestrierung]
+    I --> L[Herausforderung: Monitoring und Fehlerbehandlung]
 ```
 
-## Migration von monolithischer Verarbeitung zu Pipeline
+## Migration zu modernen Pipeline-Implementierungen
 
 ```mermaid
 graph TD
-    A[Migration zu Pipeline] --> B[1. Identifikation der Verarbeitungsschritte]
-    B --> C[2. Definition von Stage-Interfaces]
-    C --> D[3. Implementierung der einzelnen Stages]
-    D --> E[4. Verkettung zur Pipeline]
-    E --> F[5. Einführung des Kontexts für gemeinsame Daten]
-    F --> G[6. Fehlerbehandlung hinzufügen]
-    G --> H[7. Asynchrone Verarbeitung ermöglichen]
-    H --> I[8. Verteilte Ausführung implementieren]
+    A[Migration von klassischem Pipeline] --> B[Zu reaktiver Pipeline]
+    A --> C[Zu Microservice-Pipeline]
+    A --> D[Zu serverless Pipeline]
     
-    B --> J[Herausforderung: Richtige Granularität]
-    D --> K[Herausforderung: Abhängigkeiten zwischen Stages]
-    F --> L[Herausforderung: Zustandsverwaltung]
-    H --> M[Herausforderung: Fehlerfortpflanzung]
+    B --> B1[Einführung reaktiver Programmierung]
+    B --> B2[Umstellung auf nicht-blockierende Implementierung]
+    
+    C --> C1[Aufteilung in eigenständige Services]
+    C --> C2[Einführung von Service-Orchestrierung]
+    
+    D --> D1[Stages als serverless Funktionen]
+    D --> D2[Event-basierte Kommunikation]
+    
+    B1 --> E[Herausforderung: Komplexität reaktiver Programmierung]
+    C1 --> F[Herausforderung: Verteilte Fehlerbehandlung]
+    D1 --> G[Herausforderung: Kaltstart und Latenz]
+```
+
+## Parallele Pipeline-Implementierungen im Vergleich
+
+```mermaid
+graph TD
+    A[Parallelisierungsstrategien] --> B[Thread-basiert]
+    A --> C[Future-basiert]
+    A --> D[Reactive Streams]
+    A --> E[Actor-basiert]
+
+    B --> B1[Direktes Thread-Management]
+    B --> B2[Thread-Pool-Nutzung]
+    
+    C --> C1[CompletableFuture in Java]
+    C --> C2[Promise-basierte Implementierung]
+    
+    D --> D1[RxJava/Reactor]
+    D --> D2[Backpressure-Unterstützung]
+    
+    E --> E1[Akka-Framework]
+    E --> E2[Nachrichtenbasierte Kommunikation]
+    
+    B1 --> F[Manuelles Thread-Management]
+    C1 --> G[Funktionale Komposition]
+    D1 --> H[Deklarative Datenflussverarbeitung]
+    E1 --> I[Fehlertolerante verteilte Ausführung]
 ```

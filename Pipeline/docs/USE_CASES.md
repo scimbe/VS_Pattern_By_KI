@@ -9,382 +9,122 @@ mindmap
   root((Pipeline-Pattern))
     Datenverarbeitung
       ETL-Prozesse
-      Datenbereinigung
-      Datenanalyse
-      Datentransformation
-    Media Processing
-      Bild-/Videobearbeitung
-      Streaming Media
-      Renderingpipelines
-      Transkodierung
-    DevOps
+      Log-Analyse
+      Dokumentenverarbeitung
+      Stream-Processing
+    Softwareentwicklung
       CI/CD-Pipelines
-      Build-Prozesse
-      Deployment-Workflows
-      Testing-Prozesse
+      Build-Systeme
+      Code-Analyse
+      Testing-Frameworks
     Verteilte Systeme
       Microservice-Orchestrierung
-      Verteilte Berechnungen
-      Workflow-Management
-      Event-Verarbeitung
+      Event-driven Architektur
+      Real-time Analytics
+      Big Data Processing
+    Medienverarbeitung
+      Bildbearbeitung
+      Video-Encoding
+      Audio-Signalverarbeitung
+      3D-Rendering-Pipelines
 ```
 
 ## Detaillierte Anwendungsfälle
 
-### 1. ETL-Pipeline in Datenanalysesystemen
+### 1. ETL-Pipeline für Big Data
 
 ```mermaid
 flowchart TD
-    A[Datenquellen] -->|1. Extraktion| B[Extrahierungsphase]
-    B -->|2. Rohdaten| C[Validierungsphase]
-    C -->|3. Validierte Daten| D[Transformationsphase]
-    D -->|4. Transformierte Daten| E[Anreicherungsphase]
-    E -->|5. Angereicherte Daten| F[Ladephase]
-    F -->|6. Geladene Daten| G[Zieldatenbank]
-    
-    subgraph "Quellsysteme"
-        A
-    end
+    A[Datenquellen] -->|Rohdaten| B[Pipeline]
     
     subgraph "ETL-Pipeline"
-        B
-        C
-        D
-        E
-        F
+        B --> C[Stage 1: Extraktion]
+        C --> D[Stage 2: Validierung & Filterung]
+        D --> E[Stage 3: Transformation]
+        E --> F[Stage 4: Anreicherung]
+        F --> G[Stage 5: Aggregation]
+        G --> H[Stage 6: Ladung]
     end
     
-    subgraph "Zielsysteme"
-        G
+    H -->|Transformierte Daten| I[Data Warehouse]
+    
+    subgraph "Verteilte Ausführung"
+        C -.-> J[Spark-Executor 1]
+        D -.-> K[Spark-Executor 2]
+        E -.-> L[Spark-Executor 3]
+        F -.-> M[Spark-Executor n]
     end
 ```
 
-#### ETL-Pipeline: Sequenzdiagramm für Datenverarbeitung
+#### ETL-Pipeline: Sequenzdiagramm
 
 ```mermaid
 sequenceDiagram
-    participant Quelle as Datenquelle
-    participant Extract as Extraktionsphase
-    participant Transform as Transformationsphase
-    participant Load as Ladephase
-    participant Ziel as Zielsystem
+    participant Client
+    participant Controller as Pipeline-Controller
+    participant Extract as Extraktions-Stage
+    participant Transform as Transformations-Stage
+    participant Load as Lade-Stage
+    participant Storage as Datenspeicher
     
-    Quelle->>Extract: Rohdaten
-    Extract->>Extract: Daten normalisieren 
-    Extract->>Transform: Strukturierte Daten
+    Client->>Controller: starteETLPipeline(config)
+    Controller->>Controller: initialisierePipeline()
+    Controller->>Extract: konfiguriere(quellen)
+    Controller->>Transform: konfiguriere(transformationsregeln)
+    Controller->>Load: konfiguriere(ziel)
     
-    Transform->>Transform: Daten bereinigen
-    Transform->>Transform: Daten umwandeln
-    Transform->>Transform: Geschäftsregeln anwenden
+    Client->>Controller: führeAus()
+    Controller->>Extract: process(context)
+    Extract->>Storage: ladeRohdaten()
+    Storage-->>Extract: rohdaten
+    Extract->>Controller: context mit rohdaten
     
-    Transform->>Load: Transformierte Daten
-    Load->>Load: Daten für Ziel formatieren
-    Load->>Ziel: Finale Daten speichern
-    Ziel-->>Load: Bestätigung
+    Controller->>Transform: process(context)
+    Transform->>Transform: validiere()
+    Transform->>Transform: transformiere()
+    Transform->>Transform: normalisiere()
+    Transform->>Controller: context mit transformierten daten
+    
+    Controller->>Load: process(context)
+    Load->>Storage: speichereDaten(transformierteDaten)
+    Storage-->>Load: bestätigung
+    Load->>Controller: context mit status
+    
+    Controller-->>Client: ETL-Ergebnis
 ```
 
-### 2. CI/CD-Pipeline für DevOps
+### 2. CI/CD-Pipeline für Microservices
 
 ```mermaid
 flowchart LR
-    A[Code-Repository] --> B[Build-Stage]
+    A[Code-Repository] --> B[CI/CD-Pipeline]
     
     subgraph "CI/CD-Pipeline"
-        B --> C[Unit-Tests]
-        C --> D[Integration-Tests]
-        D --> E[Quality-Gate]
-        E --> F[Packaging]
-        F --> G[Deployment-Staging]
-        G --> H[Acceptance-Tests]
-        H --> I[Deployment-Production]
+        B --> C[Stage 1: Code-Checkout]
+        C --> D[Stage 2: Build]
+        D --> E[Stage 3: Unit-Tests]
+        E --> F[Stage 4: Code-Analyse]
+        F --> G[Stage 5: Integrationstests]
+        G --> H[Stage 6: Sicherheitsanalyse]
+        H --> I[Stage 7: Deployment]
+        I --> J[Stage 8: Funktionaltest]
     end
     
-    I --> J[Produktionsumgebung]
-    I --> K[Monitoring]
-```
-
-#### Aktivitätsdiagramm für CI/CD-Pipeline
-
-```mermaid
-stateDiagram-v2
-    [*] --> CodeCommit
+    J --> K[Production Environment]
     
-    CodeCommit --> BuildStage
-    BuildStage --> UnitTests
-    
-    UnitTests --> IntegrationTests: Bestanden
-    UnitTests --> Benachrichtigung: Fehlgeschlagen
-    
-    IntegrationTests --> CodeAnalyse: Bestanden
-    IntegrationTests --> Benachrichtigung: Fehlgeschlagen
-    
-    CodeAnalyse --> Packaging: Qualitätskriterien erfüllt
-    CodeAnalyse --> Benachrichtigung: Qualitätsprobleme
-    
-    Packaging --> DeployStaging
-    DeployStaging --> AcceptanceTests
-    
-    AcceptanceTests --> DeployProduction: Bestanden
-    AcceptanceTests --> Benachrichtigung: Fehlgeschlagen
-    
-    DeployProduction --> Monitoring
-    
-    Benachrichtigung --> [*]
-    Monitoring --> [*]
-```
-
-### 3. Streaming-Medienpipeline für Videobearbeitung
-
-```mermaid
-flowchart TD
-    A[Videoeingabe] -->|"1. Rohvideo"| B[Dekodierung]
-    B -->|"2. Decodierte Frames"| C[Skalierung]
-    C -->|"3. Skalierte Frames"| D[Filteranwendung]
-    D -->|"4. Bearbeitete Frames"| E[Transkodierung]
-    E -->|"5. Komprimierte Frames"| F[Segmentierung]
-    F -->|"6. Video-Segmente"| G[CDN/Auslieferung]
-    
-    subgraph "Client-System"
-        A
-    end
-    
-    subgraph "Media-Pipeline"
-        B
-        C
-        D
-        E
-        F
-    end
-    
-    subgraph "Auslieferungssystem"
-        G
+    subgraph "Fehlerbehandlung"
+        E -.-> L[Fehlernotifikation]
+        G -.-> L
+        H -.-> L
+        J -.-> L
+        L -.-> M[Rollback-Mechanismus]
     end
 ```
 
-#### Komponentendiagramm für eine Medienpipeline
-
-```mermaid
-flowchart TD
-    A[Medieneingabe] -->|"1. Eingabe"| B[Medienpipeline-Manager]
-    
-    subgraph "Media-Processing-Services"
-        B --> C[Decoder-Service]
-        C --> D[Effekt-Service]
-        D --> E[Filter-Service]
-        E --> F[Encoder-Service]
-        F --> G[Packaging-Service]
-    end
-    
-    G -->|"2. Verarbeitete Medien"| H[Content Delivery]
-    H -->|"3. Auslieferung"| I[Client-Geräte]
-```
-
-### 4. Verteilte Datenverarbeitungspipeline mit Microservices
-
-```mermaid
-flowchart TD
-    A[API Gateway] --> B[Validierungs-Service]
-    B --> C{Gültige Anfrage?}
-    
-    C -->|"Ja"| D[Verarbeitungs-Service]
-    C -->|"Nein"| J[Fehler-Handler]
-    
-    D --> E[Anreicherungs-Service]
-    E --> F[Analyse-Service]
-    F --> G[Persistenz-Service]
-    
-    G --> H[Benachrichtigungs-Service]
-    G --> I[Cache-Aktualisierungs-Service]
-    
-    J --> K[Fehlerprotokolle]
-```
-
-#### Aktivitätsdiagramm einer Microservice-Pipeline
-
-```mermaid
-stateDiagram-v2
-    [*] --> AnfrageEmpfangen
-    
-    AnfrageEmpfangen --> AnfrageValidieren
-    AnfrageValidieren --> AnfrageDatenprüfen
-    
-    AnfrageDatenprüfen --> AnfrageVerarbeiten: Daten gültig
-    AnfrageDatenprüfen --> FehlerBehandeln: Daten ungültig
-    
-    AnfrageVerarbeiten --> DatenAnreichern
-    DatenAnreichern --> AnalyseDurchführen
-    
-    AnalyseDurchführen --> ErgebnisseSpeichern
-    ErgebnisseSpeichern --> BenachrichtigungSenden
-    ErgebnisseSpeichern --> CacheAktualisieren
-    
-    BenachrichtigungSenden --> [*]
-    CacheAktualisieren --> [*]
-    FehlerBehandeln --> FehlerProtokollieren
-    FehlerProtokollieren --> [*]
-```
-
-## Design-Entscheidungen bei der Pipeline-Implementierung
-
-```mermaid
-flowchart TD
-    A[Pipeline-Design-Entscheidungen] --> B{Ausführungsmodell}
-    
-    B -->|"Synchron"| C[Sequentielle Ausführung]
-    B -->|"Asynchron"| D[Parallele/Asynchrone Ausführung]
-    
-    C --> E{Datenfluss}
-    D --> F{Fehlerbehandlung}
-    
-    E -->|"Push"| G[Aktives Weiterleiten der Daten]
-    E -->|"Pull"| H[Stages fordern Daten an]
-    
-    F -->|"Fail-Fast"| I[Abbruch bei erstem Fehler]
-    F -->|"Resilienz"| J[Wiederholungsversuche und Umgehungsstrategien]
-    
-    G --> K[Einfach zu implementieren, potenziell blockierend]
-    H --> L[Komplexer, aber bessere Kontrolle über Ressourcen]
-    
-    I --> M[Einfacheres Fehlerhandling, weniger robust]
-    J --> N[Komplexer, höhere Robustheit in Produktionsumgebungen]
-```
-
-## Evolutionspfad für Pipelines
-
-```mermaid
-flowchart LR
-    A[Monolithische Verarbeitung] --> B{Problem: Komplexität}
-    B -->|"Lösung 1"| C[Einfache sequentielle Pipeline]
-    B -->|"Lösung 2"| D[Funktionale Komposition]
-    
-    C --> E{Problem: Performance}
-    D --> E
-    
-    E -->|"Lösung 1"| F[Asynchrone Pipeline]
-    E -->|"Lösung 2"| G[Parallelisierung]
-    
-    F --> H{Problem: Skalierbarkeit}
-    G --> H
-    
-    H -->|"Lösung 1"| I[Verteilte Pipeline]
-    I --> J[Event-getriebene Microservices-Pipeline]
-```
-
-## Praktische Umsetzungsbeispiele
-
-### Beispiel 1: Implementierung einer asynchronen Bildverarbeitungspipeline in Java
-
-```java
-// Pipeline-Definition
-public class ImageProcessingPipeline {
-    
-    public CompletableFuture<ProcessedImage> processAsync(SourceImage source) {
-        return CompletableFuture
-            .supplyAsync(() -> loadImage(source))
-            .thenApply(this::resize)
-            .thenApply(this::applyFilters)
-            .thenApply(this::optimize)
-            .thenApply(this::save);
-    }
-    
-    private ImageData loadImage(SourceImage source) {
-        logger.info("Lade Bild: {}", source.getName());
-        // Implementierung des Ladens
-        return new ImageData(source);
-    }
-    
-    private ImageData resize(ImageData image) {
-        logger.info("Skaliere Bild auf Zielgröße");
-        // Implementierung der Skalierung
-        return image;
-    }
-    
-    private ImageData applyFilters(ImageData image) {
-        logger.info("Wende Filter an");
-        // Implementierung der Filteranwendung
-        return image;
-    }
-    
-    private ImageData optimize(ImageData image) {
-        logger.info("Optimiere Bild");
-        // Implementierung der Optimierung
-        return image;
-    }
-    
-    private ProcessedImage save(ImageData image) {
-        logger.info("Speichere verarbeitetes Bild");
-        // Implementierung der Speicherung
-        return new ProcessedImage(image);
-    }
-}
-```
-
-### Beispiel 2: Verteilte Datenpipeline mit Apache Kafka
-
-```java
-// Definition der Kafka-Streams-Pipeline
-public class KafkaStreamsPipeline {
-    
-    public Topology createTopology() {
-        StreamsBuilder builder = new StreamsBuilder();
-        
-        // Daten aus dem Eingangs-Topic lesen
-        KStream<String, Order> orders = builder.stream(
-            "incoming-orders", 
-            Consumed.with(Serdes.String(), OrderSerdes.instance())
-        );
-        
-        // Validierungsphase
-        KStream<String, ValidatedOrder> validatedOrders = orders
-            .filter((key, order) -> order != null && order.isValid())
-            .mapValues(order -> new ValidatedOrder(order));
-        
-        // Anreicherungsphase
-        KStream<String, EnrichedOrder> enrichedOrders = validatedOrders
-            .mapValues(order -> enrichOrder(order));
-        
-        // Verarbeitungsphase
-        KStream<String, ProcessedOrder> processedOrders = enrichedOrders
-            .mapValues(order -> processOrder(order));
-        
-        // Aufteilen in erfolgreiche und fehlgeschlagene Verarbeitungen
-        KStream<String, ProcessedOrder>[] branches = processedOrders
-            .branch(
-                (key, order) -> order.isSuccessful(),
-                (key, order) -> !order.isSuccessful()
-            );
-        
-        // Erfolgreiche Bestellungen in Erfolgs-Topic schreiben
-        branches[0].to(
-            "successful-orders", 
-            Produced.with(Serdes.String(), ProcessedOrderSerdes.instance())
-        );
-        
-        // Fehlgeschlagene Bestellungen in Fehler-Topic schreiben
-        branches[1].to(
-            "failed-orders", 
-            Produced.with(Serdes.String(), ProcessedOrderSerdes.instance())
-        );
-        
-        return builder.build();
-    }
-    
-    private EnrichedOrder enrichOrder(ValidatedOrder order) {
-        // Implementierung der Anreicherung
-        return new EnrichedOrder(order);
-    }
-    
-    private ProcessedOrder processOrder(EnrichedOrder order) {
-        // Implementierung der Verarbeitung
-        return new ProcessedOrder(order);
-    }
-}
-```
-
-### Beispiel 3: CI/CD-Pipeline mit Jenkins
+#### Jenkins Pipeline-Implementierung
 
 ```groovy
-// Jenkinsfile für eine Pipeline
+// Beispiel: Jenkins Pipeline für Microservice-Deployment
 pipeline {
     agent any
     
@@ -406,171 +146,674 @@ pipeline {
                 sh 'mvn test'
             }
             post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
+                failure {
+                    echo 'Unit Tests fehlgeschlagen!'
+                    notifyTeam()
                 }
             }
         }
         
         stage('Code Analysis') {
-            steps {
-                sh 'mvn sonar:sonar'
-            }
-        }
-        
-        stage('Package') {
-            steps {
-                sh 'mvn package'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-            }
-        }
-        
-        stage('Deploy to Staging') {
-            steps {
-                sh 'deploy-to-staging.sh'
+            parallel {
+                stage('SonarQube') {
+                    steps {
+                        sh 'mvn sonar:sonar'
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        sh 'owasp-dependency-check'
+                    }
+                }
             }
         }
         
         stage('Integration Tests') {
             steps {
-                sh 'run-integration-tests.sh'
+                sh 'mvn verify'
             }
         }
         
-        stage('Approval') {
+        stage('Deploy to Staging') {
             steps {
-                input message: 'Deploy to production?'
+                sh 'kubectl apply -f deployment.yaml --namespace=staging'
+            }
+        }
+        
+        stage('Functional Tests') {
+            steps {
+                sh 'newman run tests/api-tests.json -e staging.json'
             }
         }
         
         stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
             steps {
-                sh 'deploy-to-production.sh'
+                timeout(time: 15, unit: 'MINUTES') {
+                    input message: 'Deploy to Production?'
+                }
+                sh 'kubectl apply -f deployment.yaml --namespace=production'
             }
         }
     }
     
     post {
-        success {
-            echo 'Pipeline erfolgreich abgeschlossen'
-            notifySuccess()
-        }
         failure {
-            echo 'Pipeline fehlgeschlagen'
-            notifyFailure()
+            rollback()
+        }
+        success {
+            notifyDeploymentSuccess()
         }
     }
 }
 ```
 
-### Beispiel 4: Parallele Datenpipeline mit RxJava
+### 3. Real-time Analytics Pipeline
+
+```mermaid
+flowchart TD
+    A[Datenquellen] --> B[Event Stream]
+    
+    subgraph "Kafka-basierte Analytics-Pipeline"
+        B --> C[Stage 1: Ingestion]
+        C --> D[Stage 2: Enrichment]
+        D --> E[Stage 3: Windowing]
+        E --> F[Stage 4: Aggregation]
+        F --> G[Stage 5: Transformation]
+        G --> H[Stage 6: Output]
+    end
+    
+    H --> I[Visualisierung]
+    H --> J[Alerts]
+    H --> K[Data Lake]
+    
+    subgraph "Distributed Stream Processing"
+        C -.-> L[Kafka Streams 1]
+        D -.-> M[Kafka Streams 2]
+        E -.-> N[Kafka Streams 3]
+        F -.-> O[Kafka Streams 4]
+    end
+```
+
+#### Kafka Streams Implementierung
 
 ```java
-public class ReactiveDataPipeline {
+// Beispiel: Kafka Streams Topology für Analytics-Pipeline
+public Topology createTopology() {
+    StreamsBuilder builder = new StreamsBuilder();
     
-    public Observable<ProcessedData> processData(List<RawData> data) {
-        return Observable.fromIterable(data)
-            .flatMap(this::validateDataAsync)
-            .groupBy(ValidatedData::getCategory)
-            .flatMap(group -> group
-                .observeOn(Schedulers.computation())
-                .map(this::transformData)
-            )
-            .flatMap(this::enrichDataAsync)
-            .observeOn(Schedulers.io())
-            .map(this::saveData);
+    // Stage 1: Data Ingestion
+    KStream<String, Event> events = builder.stream("input-events", 
+            Consumed.with(Serdes.String(), eventSerde));
+    
+    // Stage 2: Data Enrichment
+    KStream<String, EnrichedEvent> enrichedEvents = events
+            .mapValues(event -> enrichmentService.enrich(event));
+    
+    // Stage 3: Windowing
+    TimeWindowedKStream<String, EnrichedEvent> windowedEvents = enrichedEvents
+            .groupByKey()
+            .windowedBy(TimeWindows.of(Duration.ofMinutes(5)));
+    
+    // Stage 4: Aggregation
+    KTable<Windowed<String>, AggregatedEvent> aggregatedEvents = windowedEvents
+            .aggregate(
+                AggregatedEvent::new,
+                (key, event, aggregate) -> aggregate.addEvent(event),
+                Materialized.with(Serdes.String(), aggregatedEventSerde)
+            );
+    
+    // Stage 5: Transformation
+    KStream<String, AnalyticsResult> results = aggregatedEvents
+            .toStream()
+            .map((windowedKey, aggregate) -> 
+                KeyValue.pair(windowedKey.key(), transformer.transform(aggregate)));
+    
+    // Stage 6: Output
+    results.to("analytics-results", 
+            Produced.with(Serdes.String(), analyticsResultSerde));
+    
+    // Publish alerts for threshold violations
+    results.filter((key, result) -> result.exceedsThreshold())
+           .to("analytics-alerts");
+    
+    return builder.build();
+}
+```
+
+### 4. Medienverarbeitungs-Pipeline
+
+```mermaid
+flowchart TD
+    A[Medien-Upload] --> B[Pipeline Controller]
+    
+    subgraph "Medienverarbeitungs-Pipeline"
+        B --> C[Stage 1: Validierung]
+        C --> D[Stage 2: Medienanalyse]
+        D --> E[Stage 3: Formatumwandlung]
+        
+        E --> F{Medientyp?}
+        F -->|Video| G[Video-Pipeline]
+        F -->|Audio| H[Audio-Pipeline]
+        F -->|Bild| I[Bild-Pipeline]
+        
+        subgraph "Video-Pipeline"
+            G --> G1[Transcode]
+            G1 --> G2[Thumbnail-Generierung]
+            G2 --> G3[Streaming-Varianten]
+        end
+        
+        subgraph "Audio-Pipeline"
+            H --> H1[Audioverarbeitung]
+            H1 --> H2[Format-Konvertierung]
+        end
+        
+        subgraph "Bild-Pipeline"
+            I --> I1[Größenanpassung]
+            I1 --> I2[Optimierung]
+            I2 --> I3[Varianten-Generierung]
+        end
+    end
+    
+    G3 --> J[Content Delivery]
+    H2 --> J
+    I3 --> J
+```
+
+#### Medienverarbeitungs-Implementierung (Pseudocode)
+
+```java
+// Media Processing Pipeline mit Strategy Pattern
+public class MediaProcessingPipeline implements Pipeline<MediaContext> {
+    private final List<Stage<MediaContext>> commonStages = new ArrayList<>();
+    private final Map<MediaType, List<Stage<MediaContext>>> typeSpecificStages = new HashMap<>();
+    
+    public MediaProcessingPipeline() {
+        // Gemeinsame Stages für alle Medientypen
+        commonStages.add(new ValidationStage());
+        commonStages.add(new MediaAnalysisStage());
+        commonStages.add(new FormatConversionStage());
+        
+        // Spezifische Stages für Videos
+        List<Stage<MediaContext>> videoStages = new ArrayList<>();
+        videoStages.add(new TranscodeStage());
+        videoStages.add(new ThumbnailGenerationStage());
+        videoStages.add(new StreamingVariantsStage());
+        typeSpecificStages.put(MediaType.VIDEO, videoStages);
+        
+        // Spezifische Stages für Audio
+        List<Stage<MediaContext>> audioStages = new ArrayList<>();
+        audioStages.add(new AudioProcessingStage());
+        audioStages.add(new AudioFormatConversionStage());
+        typeSpecificStages.put(MediaType.AUDIO, audioStages);
+        
+        // Spezifische Stages für Bilder
+        List<Stage<MediaContext>> imageStages = new ArrayList<>();
+        imageStages.add(new ResizeStage());
+        imageStages.add(new OptimizationStage());
+        imageStages.add(new VariantGenerationStage());
+        typeSpecificStages.put(MediaType.IMAGE, imageStages);
     }
     
-    private Observable<ValidatedData> validateDataAsync(RawData data) {
-        return Observable.fromCallable(() -> {
-            logger.info("Validiere Daten: {}", data.getId());
-            // Validierungslogik
-            return new ValidatedData(data);
-        }).subscribeOn(Schedulers.computation());
-    }
-    
-    private TransformedData transformData(ValidatedData data) {
-        logger.info("Transformiere Daten: {}", data.getId());
-        // Transformationslogik
-        return new TransformedData(data);
-    }
-    
-    private Observable<EnrichedData> enrichDataAsync(TransformedData data) {
-        return Observable.fromCallable(() -> {
-            logger.info("Reichere Daten an: {}", data.getId());
-            // Anreicherungslogik
-            return new EnrichedData(data);
-        }).subscribeOn(Schedulers.io());
-    }
-    
-    private ProcessedData saveData(EnrichedData data) {
-        logger.info("Speichere verarbeitete Daten: {}", data.getId());
-        // Speicherlogik
-        return new ProcessedData(data);
+    @Override
+    public MediaContext process(MediaContext context) {
+        // Führe gemeinsame Stages aus
+        for (Stage<MediaContext> stage : commonStages) {
+            context = stage.process(context);
+            if (context.hasErrors()) {
+                return context;
+            }
+        }
+        
+        // Bestimme Medientyp und führe die entsprechenden Stages aus
+        MediaType mediaType = context.getMediaType();
+        List<Stage<MediaContext>> specificStages = typeSpecificStages.get(mediaType);
+        
+        if (specificStages != null) {
+            for (Stage<MediaContext> stage : specificStages) {
+                context = stage.process(context);
+                if (context.hasErrors()) {
+                    return context;
+                }
+            }
+        }
+        
+        return context;
     }
 }
 ```
 
-## Performance-Optimierungstechniken für Pipelines
+## Design-Entscheidungen beim Pipeline-Einsatz
 
 ```mermaid
-graph TD
-    A[Performance-Optimierung] --> B[Parallelisierung]
-    A --> C[Batching]
-    A --> D[Caching]
-    A --> E[Back-Pressure]
+flowchart TD
+    A[Pipeline-Design-Entscheidungen] --> B{Ausführungsmodell}
     
-    B --> B1[Parallele Stage-Ausführung]
-    B --> B2[Parallelisierung innerhalb der Stages]
-    B --> B3[Thread-Pool-Dimensionierung]
+    B -->|"Sequentiell"| C[Lineare Pipeline]
+    B -->|"Parallel"| D[Parallele Pipeline]
+    B -->|"Hybrid"| E[Kombinierte Pipeline]
     
-    C --> C1[Batch-Größe optimieren]
-    C --> C2[Adaptive Batching-Strategien]
+    C --> F{Granularität}
+    D --> G{Fehlerbehandlung}
+    E --> H{Zustandsverwaltung}
     
-    D --> D1[Stage-Ergebnisse cachen]
-    D --> D2[Look-Aside-Caching]
+    F -->|"Grobkörnig"| I[Wenige, komplexe Stages]
+    F -->|"Feinkörnig"| J[Viele, einfache Stages]
     
-    E --> E1[Drosselung schneller Produzenten]
-    E --> E2[Elastische Puffer]
+    G -->|"Fail-Fast"| K[Abbruch bei jedem Fehler]
+    G -->|"Resilient"| L[Partielles Fortsetzen bei Fehlern]
+    
+    H -->|"Zustandslos"| M[Immutable Pipeline Context]
+    H -->|"Zustandsbehaftet"| N[Mutable Context mit Locking]
+    
+    I --> O[Einfachheit, weniger Overhead]
+    J --> P[Flexibilität, bessere Wiederverwendbarkeit]
+    
+    K --> Q[Einfachere Implementierung]
+    L --> R[Komplexere Fehlerbehandlung]
+    
+    M --> S[Bessere Parallelisierbarkeit, Thread-Safety]
+    N --> T[Einfachere Implementierung, Performance-Overhead]
 ```
 
-## Skalierungsmuster für Pipeline-Pattern
+## Evolutionspfad für Pipeline-Architekturen
 
 ```mermaid
-graph TD
-    A[Skalierungsmuster] --> B[Horizontale Skalierung]
-    A --> C[Vertikale Skalierung]
-    A --> D[Elastische Skalierung]
+flowchart LR
+    A[Monolithische Prozesse] --> B[Einfache Sequentielle Pipeline]
+    B --> C[Parallele In-Memory Pipeline]
+    C --> D[Verteilte Pipeline]
+    D --> E[Event-driven Pipeline]
+    E --> F[Serverless Pipeline]
     
-    B --> B1[Stage-Replikation]
-    B --> B2[Pipeline-Partitionierung]
+    A --> G[Schwere Wartbarkeit, schlechte Skalierbarkeit]
+    G --> B
     
-    C --> C1[Ressourcenerweiterung pro Stage]
+    B --> H[Bessere Struktur, begrenzte Skalierbarkeit]
+    H --> C
     
-    D --> D1[Automatische Skalierung basierend auf Auslastung]
-    D --> D2[Microservices-basierte Pipelines]
+    C --> I[Gute Performance auf einem Server]
+    I --> D
     
-    B1 --> E[Gleichmäßige Lastverteilung erforderlich]
-    B2 --> F[Konsistente Hashing-Strategien]
-    C1 --> G[Hardware-Grenzen]
-    D1 --> H[Überwachung und Metriken]
+    D --> J[Gute horizontale Skalierbarkeit]
+    J --> E
+    
+    E --> K[Lose Kopplung, gute Resilienz]
+    K --> F
+    
+    F --> L[Serverless-Vorteile: Pay-per-use, automatische Skalierung]
 ```
 
-## Organisatorische Aspekte von Pipeline-Implementierungen
+## Praktische Umsetzungsbeispiele
+
+### Beispiel 1: Linear Pipeline in Java
+
+```java
+public interface Stage<T> {
+    T process(T input);
+}
+
+public class LinearPipeline<T> {
+    private final List<Stage<T>> stages = new ArrayList<>();
+    
+    public LinearPipeline<T> addStage(Stage<T> stage) {
+        stages.add(stage);
+        return this;
+    }
+    
+    public T execute(T input) {
+        T current = input;
+        for (Stage<T> stage : stages) {
+            current = stage.process(current);
+        }
+        return current;
+    }
+}
+
+// Beispiel-Implementierung für Dokumentenverarbeitung
+public class DocumentContext {
+    private Document document;
+    private Map<String, Object> metadata = new HashMap<>();
+    // Getter und Setter...
+}
+
+public class ValidationStage implements Stage<DocumentContext> {
+    @Override
+    public DocumentContext process(DocumentContext context) {
+        Document doc = context.getDocument();
+        // Validierungslogik...
+        return context;
+    }
+}
+
+public class TextExtractionStage implements Stage<DocumentContext> {
+    @Override
+    public DocumentContext process(DocumentContext context) {
+        Document doc = context.getDocument();
+        String extractedText = textExtractor.extract(doc);
+        context.getMetadata().put("extractedText", extractedText);
+        return context;
+    }
+}
+
+public class ClassificationStage implements Stage<DocumentContext> {
+    @Override
+    public DocumentContext process(DocumentContext context) {
+        String text = (String)context.getMetadata().get("extractedText");
+        String category = classifier.classify(text);
+        context.getMetadata().put("category", category);
+        return context;
+    }
+}
+
+// Beispiel-Nutzung
+public class DocumentProcessor {
+    public DocumentContext processDocument(Document document) {
+        DocumentContext context = new DocumentContext();
+        context.setDocument(document);
+        
+        LinearPipeline<DocumentContext> pipeline = new LinearPipeline<>();
+        pipeline.addStage(new ValidationStage())
+                .addStage(new TextExtractionStage())
+                .addStage(new ClassificationStage());
+        
+        return pipeline.execute(context);
+    }
+}
+```
+
+### Beispiel 2: Parallele Pipeline mit CompletableFuture
+
+```java
+public class ParallelPipeline<T> {
+    private final List<Stage<T>> stages = new ArrayList<>();
+    private final ExecutorService executor;
+    
+    public ParallelPipeline(ExecutorService executor) {
+        this.executor = executor;
+    }
+    
+    public ParallelPipeline<T> addStage(Stage<T> stage) {
+        stages.add(stage);
+        return this;
+    }
+    
+    public CompletableFuture<T> executeAsync(T input) {
+        if (stages.isEmpty()) {
+            return CompletableFuture.completedFuture(input);
+        }
+        
+        List<CompletableFuture<T>> stageFutures = new ArrayList<>();
+        
+        // Erstelle ein Future für jede Stage mit einer Kopie des Input-Kontexts
+        for (Stage<T> stage : stages) {
+            stageFutures.add(CompletableFuture.supplyAsync(
+                () -> stage.process(createContextCopy(input)), executor));
+        }
+        
+        // Warte auf alle Futures und kombiniere die Ergebnisse
+        return CompletableFuture.allOf(
+                stageFutures.toArray(new CompletableFuture[0]))
+            .thenApply(v -> {
+                T result = createContextCopy(input);
+                for (CompletableFuture<T> future : stageFutures) {
+                    result = mergeResults(result, future.join());
+                }
+                return result;
+            });
+    }
+    
+    // Diese Methoden müssen für den konkreten Kontext-Typ implementiert werden
+    protected abstract T createContextCopy(T original);
+    protected abstract T mergeResults(T base, T toMerge);
+}
+
+// Beispiel für eine Pipeline zur parallelen Bildverarbeitung
+public class ImageProcessingPipeline {
+    public CompletableFuture<ProcessedImage> processImageAsync(BufferedImage originalImage) {
+        ImageContext context = new ImageContext(originalImage);
+        
+        ExecutorService executor = Executors.newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors());
+        
+        ParallelPipeline<ImageContext> pipeline = new ImageParallelPipeline(executor);
+        
+        pipeline.addStage(new ResizeStage())
+                .addStage(new FilterStage())
+                .addStage(new CompressionStage());
+        
+        return pipeline.executeAsync(context)
+                .thenApply(ImageContext::getProcessedImage)
+                .whenComplete((result, error) -> executor.shutdown());
+    }
+}
+```
+
+### Beispiel 3: Verteilte Pipeline mit Apache Kafka
+
+```java
+// Beispiel für eine verteilte Pipeline mit Kafka
+public class KafkaPipelineStage {
+    private final String consumeTopic;
+    private final String produceTopic;
+    private final Properties kafkaProps;
+    
+    public KafkaPipelineStage(String consumeTopic, String produceTopic, 
+                             Properties kafkaProps) {
+        this.consumeTopic = consumeTopic;
+        this.produceTopic = produceTopic;
+        this.kafkaProps = kafkaProps;
+    }
+    
+    public void start() {
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(kafkaProps);
+        KafkaProducer<String, String> producer = new KafkaProducer<>(kafkaProps);
+        
+        consumer.subscribe(Collections.singletonList(consumeTopic));
+        
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                while (true) {
+                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+                    
+                    for (ConsumerRecord<String, String> record : records) {
+                        // Verarbeite die Eingabe
+                        String processedValue = processData(record.value());
+                        
+                        // Sende das Ergebnis an die nächste Stage
+                        ProducerRecord<String, String> outputRecord = 
+                            new ProducerRecord<>(produceTopic, record.key(), processedValue);
+                        
+                        producer.send(outputRecord);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                consumer.close();
+                producer.close();
+                executor.shutdown();
+            }
+        });
+    }
+    
+    private String processData(String data) {
+        // Tatsächliche Datenverarbeitungslogik
+        return transformedData;
+    }
+    
+    // Beispiel: Einrichtung einer verteilten Pipeline
+    public static void setupDistributedPipeline() {
+        Properties props = new Properties();
+        props.put("bootstrap.servers", "localhost:9092");
+        props.put("group.id", "pipeline-group");
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        
+        // Stage 1: Datenextraktion
+        KafkaPipelineStage extractionStage = 
+            new KafkaPipelineStage("raw-data", "extracted-data", props);
+        extractionStage.start();
+        
+        // Stage 2: Datenvalidierung
+        KafkaPipelineStage validationStage = 
+            new KafkaPipelineStage("extracted-data", "validated-data", props);
+        validationStage.start();
+        
+        // Stage 3: Datentransformation
+        KafkaPipelineStage transformationStage = 
+            new KafkaPipelineStage("validated-data", "transformed-data", props);
+        transformationStage.start();
+        
+        // Stage 4: Datenspeicherung
+        KafkaPipelineStage storageStage = 
+            new KafkaPipelineStage("transformed-data", "stored-data", props);
+        storageStage.start();
+    }
+}
+```
+
+### Beispiel 4: Serverless Pipeline mit AWS Step Functions
+
+```json
+{
+  "Comment": "ETL Pipeline mit AWS Step Functions",
+  "StartAt": "Extract",
+  "States": {
+    "Extract": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:ExtractFunction",
+      "Next": "Validate"
+    },
+    "Validate": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:ValidateFunction",
+      "Next": "DataValidChoice"
+    },
+    "DataValidChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.isValid",
+          "BooleanEquals": true,
+          "Next": "Transform"
+        }
+      ],
+      "Default": "HandleInvalidData"
+    },
+    "HandleInvalidData": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:HandleInvalidDataFunction",
+      "End": true
+    },
+    "Transform": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:TransformFunction",
+      "Next": "ParallelProcessing"
+    },
+    "ParallelProcessing": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "EnrichData",
+          "States": {
+            "EnrichData": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:EnrichFunction",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "AggregateData",
+          "States": {
+            "AggregateData": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:AggregateFunction",
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "Load"
+    },
+    "Load": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:LoadFunction",
+      "End": true
+    }
+  }
+}
+```
+
+## Herausforderungen und Lösungen im verteilten Kontext
+
+### 1. Fehlerbehandlung in verteilten Pipelines
+
+**Problem**: In verteilten Pipelines kann ein Fehler in einer Stage zur Inkonsistenz im gesamten System führen.
+
+**Lösungen**:
+- Wiederholungsmechanismen mit exponentieller Backoff-Strategie
+- Circuit-Breaker-Pattern für fehleranfällige Services
+- Dead-Letter-Queues für fehlgeschlagene Verarbeitungen
+- Transaktionssicherheit für zusammengehörige Operationen
+- Idempotente Operationen für sichere Wiederholungen
+
+### 2. Monitoring und Nachverfolgbarkeit
+
+**Problem**: Nachverfolgen von Daten durch mehrere Stages in verteilten Systemen ist komplex.
+
+**Lösungen**:
+- Korrelations-IDs für end-to-end Nachverfolgung
+- Verteiltes Tracing mit Jaeger oder Zipkin
+- Metriken für jede Pipeline-Stage
+- Zentralisiertes Logging mit Kontext-Informationen
+- Dashboards mit Pipeline-Durchsatz und Latenz-Metriken
+
+### 3. Skalierung und Performance
+
+**Problem**: Unterschiedliche Stages können unterschiedliche Ressourcenanforderungen haben.
+
+**Lösungen**:
+- Unabhängige Skalierung jeder Pipeline-Stage
+- Dynamische Parallelität basierend auf Last
+- Caching zwischen Stages für häufig benötigte Daten
+- Backpressure-Mechanismen für überlastete Stages
+- Batch-Verarbeitung für effizienten Durchsatz
+
+### 4. Pipeline-Orchestrierung
+
+**Problem**: Koordination komplexer Pipelines mit bedingten Pfaden und Parallelität.
+
+**Lösungen**:
+- Workflow-Engines wie Apache Airflow
+- Serverless Orchestrierungsdienste wie AWS Step Functions
+- Event-basierte Koordination mit Message Brokern
+- Declarative Pipeline-Definitionen
+- Zentrale Pipeline-Registry mit Versionierung
+
+## Zukunftstrends bei Pipeline-Architekturen
 
 ```mermaid
-graph TD
-    A[Organisatorische Aspekte] --> B[Team-Struktur]
-    A --> C[Verantwortlichkeiten]
-    A --> D[Monitoring]
+flowchart TD
+    A[Zukunftstrends] --> B[AI-gesteuerte Pipelines]
+    A --> C[Self-healing Pipelines]
+    A --> D[Zero-Code Pipeline-Builder]
+    A --> E[Cross-Cloud Pipelines]
     
-    B --> B1[Stage-orientierte Teams]
-    B --> B2[Pipeline-übergreifende Teams]
+    B --> B1[Dynamische Optimierung der Pipeline-Konfiguration]
+    B --> B2[Automatische Generierung von Transformationsregeln]
     
-    C --> C1[Klare Eigentümerschaft von Stages]
-    C --> C2[End-to-End-Verantwortung]
+    C --> C1[Automatische Fehlererkennung und -behebung]
+    C --> C2[Autonome Skalierung und Ressourcenoptimierung]
     
-    D --> D1[Metriken pro Stage]
-    D --> D2[End-to-End-Überwachung]
-    D --> D3[Alarme und Benachrichtigungen]
-```
+    D --> D1[Visuelle Pipeline-Editoren]
+    D --> D2[Marketplace für vorgefertigte Pipeline-Komponenten]
+    
+    E --> E1[Nahtlose Integration multipler Cloud-Anbieter]
+    E --> E2[Föderation von Pipeline-Ressourcen]

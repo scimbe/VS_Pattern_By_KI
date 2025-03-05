@@ -3,11 +3,19 @@ package de.becke.vs.pattern.singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Hauptklasse zur Demonstration der verschiedenen Singleton-Implementierungen.
  * 
  * Diese Klasse zeigt die Verwendung der verschiedenen Singleton-Varianten
- * und deren Anwendung in Szenarien verteilter Systeme.
+ * und deren Anwendung in Szenarien verteilter Systeme, insbesondere für Microservices.
  */
 public class Main {
     
@@ -30,6 +38,12 @@ public class Main {
         
         // Demonstration: Thread-Safety mit simulierten Client-Anfragen
         demonstrateMultithreadedAccess();
+        
+        // Demonstration: Serialisierungstest (wichtig für Microservices)
+        demonstrateSerialization();
+        
+        // Demonstration: Microservice Load-Balancing Simulation
+        demonstrateMicroserviceScenario();
         
         LOGGER.info("Demonstration abgeschlossen");
     }
@@ -124,30 +138,141 @@ public class Main {
     private static void demonstrateMultithreadedAccess() {
         LOGGER.info("\n--- Multithreaded Access Demonstration ---");
         
+        final int threadCount = 10;
+        final CountDownLatch startSignal = new CountDownLatch(1);
+        final CountDownLatch doneSignal = new CountDownLatch(threadCount);
+        
         // Simuliere mehrere Client-Anfragen in einem verteilten System
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < threadCount; i++) {
             final int clientId = i;
             
             Thread clientThread = new Thread(() -> {
-                LOGGER.info("Client {} versucht, auf ThreadSafeSingleton zuzugreifen", clientId);
-                ThreadSafeSingleton instance = ThreadSafeSingleton.getInstance();
-                LOGGER.info("Client {} hat Zugriff auf ThreadSafeSingleton mit Status: {}", 
-                        clientId, instance.getConnectionState());
-                
-                // Simulate some work
-                String result = instance.executeRemoteOperation("GetDataForClient" + clientId);
-                LOGGER.info("Client {} Ergebnis: {}", clientId, result);
+                try {
+                    // Warte auf das Startsignal (simuliert gleichzeitigen Zugriff)
+                    startSignal.await();
+                    
+                    LOGGER.info("Client {} versucht, auf ThreadSafeSingleton zuzugreifen", clientId);
+                    ThreadSafeSingleton instance = ThreadSafeSingleton.getInstance();
+                    LOGGER.info("Client {} hat Zugriff auf ThreadSafeSingleton mit Status: {}", 
+                            clientId, instance.getConnectionState());
+                    
+                    // Simuliere Arbeit
+                    String result = instance.executeRemoteOperation("GetDataForClient" + clientId);
+                    LOGGER.info("Client {} Ergebnis: {}", clientId, result);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Thread unterbrochen", e);
+                    Thread.currentThread().interrupt();
+                } finally {
+                    doneSignal.countDown();
+                }
             });
             
             clientThread.start();
         }
         
-        // Warte kurz, um die Thread-Ausführung zu beobachten
+        // Alle Threads gleichzeitig starten
+        startSignal.countDown();
+        
+        // Warten, bis alle Threads fertig sind
         try {
-            Thread.sleep(500);
+            doneSignal.await();
         } catch (InterruptedException e) {
-            LOGGER.error("Thread unterbrochen", e);
+            LOGGER.error("Warten auf Threads unterbrochen", e);
             Thread.currentThread().interrupt();
+        }
+    }
+    
+    /**
+     * Demonstriert die Serialisierungs- und Deserialisierungssicherheit der Singletons.
+     * Dies ist wichtig für verteilte Systeme, in denen Objekte über das Netzwerk übertragen werden.
+     */
+    private static void demonstrateSerialization() {
+        LOGGER.info("\n--- Serialisierungssicherheit Demonstration ---");
+        
+        try {
+            // BasicSingleton serialisieren
+            BasicSingleton original = BasicSingleton.getInstance();
+            original.setData("Daten vor Serialisierung");
+            
+            // Serialisierung
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(original);
+            oos.close();
+            
+            // Deserialisierung
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            BasicSingleton deserialized = (BasicSingleton) ois.readObject();
+            ois.close();
+            
+            // Sind die Instanzen identisch?
+            LOGGER.info("Original == Deserialisiert: {}", original == deserialized);
+            LOGGER.info("Original Daten: {}", original.getData());
+            LOGGER.info("Deserialisierte Daten: {}", deserialized.getData());
+            
+            // Das gleiche für ThreadSafeSingleton
+            ThreadSafeSingleton tsOriginal = ThreadSafeSingleton.getInstance();
+            
+            baos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(baos);
+            oos.writeObject(tsOriginal);
+            oos.close();
+            
+            bais = new ByteArrayInputStream(baos.toByteArray());
+            ois = new ObjectInputStream(bais);
+            ThreadSafeSingleton tsDeserialized = (ThreadSafeSingleton) ois.readObject();
+            ois.close();
+            
+            LOGGER.info("ThreadSafeSingleton Original == Deserialisiert: {}", tsOriginal == tsDeserialized);
+            
+        } catch (Exception e) {
+            LOGGER.error("Fehler während Serialisierungstest", e);
+        }
+    }
+    
+    /**
+     * Demonstriert ein typisches Microservice-Szenario mit multiplen Instanzen.
+     */
+    private static void demonstrateMicroserviceScenario() {
+        LOGGER.info("\n--- Microservice-Szenario Demonstration ---");
+        
+        // Simuliert mehrere Microservice-Instanzen mit einem Thread-Pool
+        ExecutorService servicePool = Executors.newFixedThreadPool(3);
+        
+        // Konfigurationsänderung simulieren
+        EnumSingleton configManager = EnumSingleton.INSTANCE;
+        configManager.setConfigValue("service.endpoint", "/api/v2/data");
+        
+        // Simuliere Anfragen an verschiedene Microservice-Instanzen
+        for (int i = 0; i < 5; i++) {
+            final int requestId = i;
+            servicePool.submit(() -> {
+                LOGGER.info("Microservice bearbeitet Anfrage {}", requestId);
+                
+                // Konfiguration abrufen (sollte in allen Instanzen gleich sein)
+                String endpoint = configManager.getConfigValue("service.endpoint");
+                LOGGER.info("Anfrage {} verwendet Endpoint: {}", requestId, endpoint);
+                
+                // Datenbank-Verbindung simulieren
+                ThreadSafeSingleton connectionManager = ThreadSafeSingleton.getInstance();
+                String result = connectionManager.executeRemoteOperation("ProcessRequest" + requestId);
+                LOGGER.info("Ergebnis für Anfrage {}: {}", requestId, result);
+            });
+        }
+        
+        // Aufräumen
+        servicePool.shutdown();
+        try {
+            // Warte maximal 2 Sekunden, bis alle Aufgaben abgeschlossen sind
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            LOGGER.error("Warten unterbrochen", e);
+            Thread.currentThread().interrupt();
+        }
+        
+        if (!servicePool.isTerminated()) {
+            servicePool.shutdownNow();
         }
     }
 }

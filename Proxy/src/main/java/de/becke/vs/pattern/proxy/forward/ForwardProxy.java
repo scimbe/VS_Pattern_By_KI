@@ -80,12 +80,14 @@ public class ForwardProxy implements RemoteService {
         }
         
         // Filtere den Parameter, falls Inhaltsfilterung aktiviert ist
-        String filteredParameter = parameter;
+        final String filteredParameter;
         if (contentFilter != null) {
             filteredParameter = contentFilter.filterContent(parameter);
             if (loggingEnabled && !filteredParameter.equals(parameter)) {
                 LOGGER.info("ForwardProxy: Parameter gefiltert von '{}' zu '{}'", parameter, filteredParameter);
             }
+        } else {
+            filteredParameter = parameter;
         }
         
         // Aktualisiere die Parameter-Häufigkeitsstatistik
@@ -122,8 +124,8 @@ public class ForwardProxy implements RemoteService {
         }
         
         // Filtere die Daten, falls Inhaltsfilterung aktiviert ist
-        String filteredData = data;
-        String[] filteredOptions = options;
+        final String filteredData;
+        final String[] filteredOptions;
         
         if (contentFilter != null) {
             filteredData = contentFilter.filterContent(data);
@@ -136,10 +138,14 @@ public class ForwardProxy implements RemoteService {
             if (loggingEnabled && (!filteredData.equals(data) || hasFilteredOptions(options, filteredOptions))) {
                 LOGGER.info("ForwardProxy: Komplexe Anfragedaten gefiltert");
             }
+        } else {
+            filteredData = data;
+            filteredOptions = options;
         }
         
         // Führe die komplexe Anfrage aus
-        String response = executeRequest(() -> targetService.complexRequest(id, filteredData, filteredOptions));
+        final int finalId = id;
+        String response = executeRequest(() -> targetService.complexRequest(finalId, filteredData, filteredOptions));
         
         // Filtere die Antwort, falls Inhaltsfilterung aktiviert ist
         if (contentFilter != null) {

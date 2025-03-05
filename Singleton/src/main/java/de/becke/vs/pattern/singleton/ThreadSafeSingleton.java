@@ -3,30 +3,41 @@ package de.becke.vs.pattern.singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+
 /**
- * Eine thread-sichere Implementierung des Singleton-Patterns.
+ * Eine verbesserte thread-sichere Implementierung des Singleton-Patterns für Microservices.
  * 
- * Diese Klasse demonstriert eine thread-sichere Implementierung des Singleton-Patterns
- * unter Verwendung der Double-Checked-Locking-Technik, die für Umgebungen mit
- * mehreren Threads geeignet ist, insbesondere in verteilten Systemen.
+ * Diese Klasse demonstriert eine thread-sichere, serialisierbare und für Microservices optimierte
+ * Implementierung des Singleton-Patterns unter Verwendung der Double-Checked-Locking-Technik.
  */
-public class ThreadSafeSingleton {
+public class ThreadSafeSingleton implements Serializable {
     
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadSafeSingleton.class);
     
-    // Volatile stellt sicher, dass Änderungen sofort für alle Threads sichtbar sind
-    private static volatile ThreadSafeSingleton instance;
+    // Für Lazy Holder Pattern
+    private static class SingletonHolder {
+        private static final ThreadSafeSingleton INSTANCE = new ThreadSafeSingleton();
+    }
     
     // Simulierte Verbindung oder Ressource
-    private String connectionState;
+    private transient String connectionState;
     
     /**
      * Private Konstruktor, der die Erstellung von Instanzen von außen verhindert.
      */
     private ThreadSafeSingleton() {
         LOGGER.info("ThreadSafeSingleton wird initialisiert");
-        // Simuliert eine zeitaufwändige Initialisierung wie z.B. einen Verbindungsaufbau
+        initConnection();
+    }
+    
+    /**
+     * Initialisiert die Verbindung. Kann auch zur Wiederherstellung nach Deserialisierung verwendet werden.
+     */
+    private void initConnection() {
         try {
+            // Simuliert eine zeitaufwändige Initialisierung wie z.B. einen Verbindungsaufbau
             Thread.sleep(100);
             connectionState = "Verbunden";
             LOGGER.info("Verbindung initialisiert");
@@ -38,24 +49,13 @@ public class ThreadSafeSingleton {
     }
     
     /**
-     * Gibt die einzige Instanz der Klasse zurück mit Double-Checked Locking
-     * für Threadsicherheit und optimale Performance.
+     * Gibt die einzige Instanz der Klasse zurück.
+     * Verwendet das Initialization-on-demand holder idiom für thread-sichere lazy initialization.
      *
      * @return die einzige Instanz von ThreadSafeSingleton
      */
     public static ThreadSafeSingleton getInstance() {
-        // Erste Prüfung ohne Synchronisation für bessere Performance
-        if (instance == null) {
-            // Synchronisiert den Zugriff, wenn instance noch null ist
-            synchronized (ThreadSafeSingleton.class) {
-                // Zweite Prüfung innerhalb des synchronisierten Blocks
-                if (instance == null) {
-                    LOGGER.info("Erzeuge neue ThreadSafeSingleton-Instanz");
-                    instance = new ThreadSafeSingleton();
-                }
-            }
-        }
-        return instance;
+        return SingletonHolder.INSTANCE;
     }
     
     /**
@@ -79,6 +79,15 @@ public class ThreadSafeSingleton {
         if ("Verbunden".equals(connectionState)) {
             return "Ergebnis der Operation: " + operation + " erfolgreich ausgeführt";
         } else {
+            // Versuche die Verbindung wiederherzustellen, was in Microservices wichtig ist
+            LOGGER.warn("Keine Verbindung. Versuche Wiederverbindung...");
+            initConnection();
+            
+            if ("Verbunden".equals(connectionState)) {
+                LOGGER.info("Wiederverbindung erfolgreich, führe Operation aus");
+                return "Ergebnis der Operation (nach Wiederverbindung): " + operation + " erfolgreich ausgeführt";
+            }
+            
             return "Fehler: Keine Verbindung zum Remote-System";
         }
     }
@@ -89,5 +98,14 @@ public class ThreadSafeSingleton {
     public void closeConnection() {
         LOGGER.info("Verbindung wird geschlossen");
         connectionState = "Getrennt";
+    }
+    
+    /**
+     * Schützt vor Singleton-Verletzung durch Deserialisierung.
+     * 
+     * @return Die bestehende Singleton-Instanz
+     */
+    protected Object readResolve() {
+        return getInstance();
     }
 }
