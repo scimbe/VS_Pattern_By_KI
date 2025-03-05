@@ -15,19 +15,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up JDK 11
+    - name: Set up JDK 11 and Maven
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '11'
         cache: 'maven'
 
-    - name: Set up Maven
-      uses: s4u/setup-maven@v2
-      with:
-        maven-version: '3.8.6'
+    - name: Build and run Unit Tests
+      run: mvn -B test
 
-    - name: Build and test with Maven
+    - name: Verify Build
       run: mvn -B verify
 
     - name: Code Quality Check
