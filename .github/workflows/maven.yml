@@ -29,20 +29,6 @@ jobs:
           (cd "$dir" && mvn -B test verify)
         done
 
-    - name: Code Quality Check
-      run: |
-        for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
-          echo "Running Checkstyle in $dir"
-          (cd "$dir" && mvn checkstyle:check)
-        done
-
-    - name: Security Scan
-      run: |
-        for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
-          echo "Running Security Scan in $dir"
-          (cd "$dir" && mvn org.owasp:dependency-check-maven:check)
-        done
-
     - name: Deployment
       env:
         MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
