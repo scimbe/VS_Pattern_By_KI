@@ -36,5 +36,5 @@ jobs:
       run: |
         for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
           echo "Deploying Maven project in $dir"
-          (cd "$dir" && mvn deploy)
+          (cd "$dir" && mvn clean install compile exec:java)
         done
