@@ -21,7 +21,7 @@ jobs:
         java-version: '11'
 
     - name: Build and test with Maven
-      uses: apache/maven@v3
+      uses: apache/maven@v3.8.4
       with:
         options: -B
         goals: install
