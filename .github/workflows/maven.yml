@@ -22,20 +22,33 @@ jobs:
         java-version: '11'
         cache: 'maven'
 
-    - name: Build and run Unit Tests
-      run: mvn -B test
-
-    - name: Verify Build
-      run: mvn -B verify
+    - name: Build and run Unit Tests for all Maven projects
+      run: |
+        for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
+          echo "Processing Maven project in $dir"
+          (cd "$dir" && mvn -B test verify)
+        done
 
     - name: Code Quality Check
-      run: mvn checkstyle:check
+      run: |
+        for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
+          echo "Running Checkstyle in $dir"
+          (cd "$dir" && mvn checkstyle:check)
+        done
 
     - name: Security Scan
-      run: mvn org.owasp:dependency-check-maven:check
+      run: |
+        for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
+          echo "Running Security Scan in $dir"
+          (cd "$dir" && mvn org.owasp:dependency-check-maven:check)
+        done
 
     - name: Deployment
       env:
         MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-      run: mvn deploy
+      run: |
+        for dir in $(find . -name "pom.xml" -exec dirname {} \; | sort -u); do
+          echo "Deploying Maven project in $dir"
+          (cd "$dir" && mvn deploy)
+        done
