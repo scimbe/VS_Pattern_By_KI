@@ -1,4 +1,5 @@
 # VS Pattern (Supported by Claude)
+URL des Proejktes: https://github.com/scimbe/VS_Pattern_By_KI     
 
 ## Überblick
 
