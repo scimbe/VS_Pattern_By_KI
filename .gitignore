@@ -13,6 +13,3 @@ logs/
 # Ignore log files
 *.log
 /logs/
-
-# Ignore GitHub Actions workflows
-.github/

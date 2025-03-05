@@ -21,7 +21,43 @@ jobs:
         java-version: '11'
 
     - name: Set up Maven
-      uses: actions/setup-maven@v2
+      uses: s4u/setup-maven@v2
 
     - name: Build and test with Maven
       run: mvn -B install
+
+    - name: Code Quality Check
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Security Scan
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Deployment
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
