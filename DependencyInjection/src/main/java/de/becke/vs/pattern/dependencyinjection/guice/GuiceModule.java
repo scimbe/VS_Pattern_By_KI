@@ -15,6 +15,17 @@ import org.slf4j.LoggerFactory;
 public class GuiceModule extends AbstractModule {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(GuiceModule.class);
+    private boolean testMode = false;
+    
+    // Standard-Konstruktor für normalen Betrieb
+    public GuiceModule() {
+        this(false);
+    }
+    
+    // Konstruktor mit Option für Testmodus
+    public GuiceModule(boolean testMode) {
+        this.testMode = testMode;
+    }
     
     @Override
     protected void configure() {
@@ -71,7 +82,8 @@ public class GuiceModule extends AbstractModule {
             
             @Override
             public String executeOperation() {
-                if (Math.random() < 0.5) {
+                // Im Testmodus immer einen Fehler werfen, um das Verhalten vorhersehbar zu machen
+                if (testMode || Math.random() < 0.5) {
                     throw new RuntimeException("Simulierter Fehler im UnreliableGuiceService");
                 }
                 return delegate.executeOperation();
@@ -79,7 +91,8 @@ public class GuiceModule extends AbstractModule {
             
             @Override
             public String executeOperation(String parameter) {
-                if (Math.random() < 0.5) {
+                // Im Testmodus immer einen Fehler werfen, um das Verhalten vorhersehbar zu machen
+                if (testMode || Math.random() < 0.5) {
                     throw new RuntimeException("Simulierter Fehler im UnreliableGuiceService");
                 }
                 return delegate.executeOperation(parameter);
