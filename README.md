@@ -1,10 +1,10 @@
 # VS Pattern (Supported by Claude)
-URL des Proejktes: https://github.com/scimbe/VS_Pattern_By_KI     
+URL des Projektes: https://github.com/scimbe/VS_Pattern_By_KI     
 
 ## Überblick
 
-Dieses Repository enthält Beispielimplementierungen verschiedener Entwurfsmuster (Design Patterns), die in der Vorlesung Verteilte Systeme (VS) von Prof. Dr. Martin Becke verwendet werden. Jedes Pattern wurde als eigenständiges Maven-Projekt implementiert, um die praktische Anwendung in verteilten Systemen zu demonstrieren.     
-Zum Test der Integrationsmöglichkeiten von Claude in die Lehre wurde das SE durch Claude begleitet. http://claude.ai.
+Dieses Repository enthält Beispielimplementierungen verschiedener Entwurfsmuster (Design Patterns), die in der Vorlesung "Verteilte Systeme" (VS) von Prof. Dr. Martin Becke verwendet werden. Jedes Pattern wurde als eigenständiges Maven-Projekt implementiert, um die praktische Anwendung in verteilten Systemen zu demonstrieren.     
+Zum Test der Integrationsmöglichkeiten von Claude in die Lehre wurde das Software Engineering durch Claude begleitet. http://claude.ai.
 
 ## Struktur
 
@@ -22,7 +22,7 @@ Das Repository ist wie folgt strukturiert:
 
 Die folgenden Entwurfsmuster sind in diesem Repository implementiert:
 
-1. **Singleton Pattern** - Stellt sicher, dass eine Klasse nur eine Instanz besitzt
+1. **Singleton Pattern** - Stellt sicher, dass eine Klasse innerhalb eines Run-time Environments nur eine Instanz besitzt
   - Thread-sichere Implementierungsvarianten
   - Lazy Loading und Early Initialization
   - Anwendungen in verteilten Systemen (Konfigurationsmanagement, Verbindungspools)
@@ -34,14 +34,14 @@ Die folgenden Entwurfsmuster sind in diesem Repository implementiert:
   - Anwendung in Event-Driven Architectures und Publish-Subscribe-Systemen
   - Bewährte Praktiken für asynchrone Benachrichtigungen
 
-3. **Proxy Pattern** - Stellt einen Stellvertreter für ein anderes Objekt dar
+3. **Proxy Pattern** - Stellt einen Stellvertreter für ein anderes System dar
   - Forward-Proxy und Reverse-Proxy
   - Caching-Proxy für Leistungsoptimierung
   - Load-Balancing-Proxy für Lastverteilung
   - Broker- und Trader-Ausprägungen
   - Implementierungen für Remote-Zugriff und Service-Discovery
 
-4. **Facade Pattern** - Bietet eine vereinfachte Schnittstelle zu einem komplexen Subsystem
+4. **Facade Pattern** - Fasst Schnittstellen zu einem komplexen Subsystem zusammen
   - Remote Facade für entfernte Dienste
   - System-of-Systems Integration
   - API-Gateway-Implementierungen
@@ -53,7 +53,7 @@ Die folgenden Entwurfsmuster sind in diesem Repository implementiert:
   - Legacy-System-Integration
   - Schnittstellenvermittlung zwischen Microservices
 
-6. **Dependency Injection** - Pattern zur Entkopplung von Abhängigkeiten
+6. **Dependency Injection** - Pattern zur Entkopplung von Erzeugungsabhängigkeiten
   - Constructor Injection
   - Setter Injection
   - Interface Injection
@@ -107,7 +107,7 @@ Die Beispiele veranschaulichen, wie das Pattern in ereignisgesteuerten Architekt
 Das Proxy-Projekt umfasst verschiedene Arten von Proxy-Implementierungen, die in verteilten Systemen häufig verwendet werden:
 
 - Forward-Proxy für Client-Zugriff auf entfernte Dienste
-- Reverse-Proxy als API-Gateway für Microservices
+- Reverse-Proxy als Gateway für mehrere Microservices ( **Achtung: Reverse-Proxy ist kein API-Gateway!** )
 - Caching-Proxy zur Leistungsoptimierung
 - Load-Balancing-Proxy zur Lastverteilung
 - Broker-Proxy zur Vermittlung zwischen Clients und Diensten
@@ -117,7 +117,7 @@ Die Implementierungen demonstrieren, wie Proxies zur Zugriffskontrolle, Leistung
 
 ### Facade Pattern
 
-Das Facade-Projekt zeigt, wie komplexe Subsysteme hinter einfachen Schnittstellen verborgen werden können:
+Das Facade-Projekt zeigt, wie komplexe Subsysteme hinter einfachen (**Achtung: was bedeutet "einfach"?**) Schnittstellen verborgen werden können:
 
 - Remote Facade für entfernte Dienste
 - System-Integration Facade für Enterprise-Anwendungen
@@ -140,13 +140,13 @@ Die Implementierungen zeigen, wie das Adapter-Pattern zur nahtlosen Integration 
 
 ### Dependency Injection
 
-Das Dependency-Injection-Projekt zeigt Techniken zur Entkopplung von Abhängigkeiten:
+Das Dependency-Injection-Projekt zeigt Techniken zur Entkopplung von Erzeugungsabhängigkeiten:
 
 - Constructor Injection für unveränderliche Abhängigkeiten
 - Setter Injection für optionale Abhängigkeiten
 - Interface Injection für flexible Konfiguration
-- Service Locator als Alternative zu DI
-- Integration mit IoC-Containern
+- Service Locator als Alternative zu Dependency Injection
+- Integration mit IoC-Containern (**???**)
 
 Die Beispiele veranschaulichen, wie Dependency Injection die Testbarkeit, Modularität und Flexibilität in verteilten Anwendungen verbessert.
 
@@ -159,7 +159,7 @@ Das Pipeline-Projekt implementiert Verarbeitungsabläufe als Folge von Schritten
 - Pipeline-Komponenten für Transformation, Validierung und Anreicherung
 - Fehlerbehandlung in Pipeline-Architekturen
 
-Die Implementierungen demonstrieren, wie das Pipeline-Pattern zur strukturierten Datenverarbeitung in verteilten Systemen beiträgt.
+Die Implementierungen demonstrieren, wie das Pipeline-Pattern zur strukturierten Datenverarbeitung in verteilten Systemen beiträgt. (**Wozu/Zweck? Parallelisierung?**)
 
 ### Callback Pattern
 
@@ -199,12 +199,12 @@ Spezifische Ausführungsanweisungen und Beispiele finden Sie in der README.md je
 
 Diese Beispiele sollen:
 
-1. Das Verständnis grundlegender Entwurfsmuster fördern
-2. Die Anwendung von Patterns in verteilten Systemen veranschaulichen
-3. Als Referenz für Studenten der VS-Vorlesung dienen
-4. Praktische Implementierungsbeispiele mit Best Practices bieten
-5. Die Herausforderungen und Lösungsansätze in verteilten Umgebungen demonstrieren
-6. Die Grenzen und Kompromisse verschiedener Pattern-Implementierungen aufzeigen
+1. das Verständnis grundlegender Entwurfsmuster fördern, (**müssen wir diskutieren**)
+2. die Anwendung von Patterns in verteilten Systemen veranschaulichen,
+3. als Referenz für Studenten der VS-Vorlesung dienen,
+4. praktische Implementierungsbeispiele mit Best Practices bieten,
+5. die Herausforderungen und Lösungsansätze in verteilten Umgebungen demonstrieren und
+6. die Grenzen und Kompromisse verschiedener Pattern-Implementierungen aufzeigen.
 
 ## Mitwirkung
 
